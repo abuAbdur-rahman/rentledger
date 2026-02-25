@@ -245,7 +245,7 @@ export function Sidebar({ user }: SidebarProps) {
             align="end"
             side="top"
             sideOffset={8}
-            className="w-56 rounded-[12px] border border-gray-200 shadow-xl shadow-gray-200/60 p-1.5"
+            className="w-56 rounded-2xl border border-gray-200 shadow-xl shadow-gray-200/60 p-1.5"
           >
             <DropdownMenuLabel className="px-2 py-1.5">
               <p className="text-sm font-semibold text-gray-900">{user.name}</p>
@@ -257,31 +257,25 @@ export function Sidebar({ user }: SidebarProps) {
             <DropdownMenuGroup>
               <DropdownMenuItem
                 asChild
-                className="rounded-[8px] cursor-pointer focus:bg-gray-50"
+                className="rounded-xl cursor-pointer focus:bg-gray-50"
               >
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2"
-                >
+                <Link href="/profile" className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm">My Profile</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 asChild
-                className="rounded-[8px] cursor-pointer focus:bg-gray-50"
+                className="rounded-xl cursor-pointer focus:bg-gray-50"
               >
-                <Link
-                  href="/settings"
-                  className="flex items-center gap-2"
-                >
+                <Link href="/settings" className="flex items-center gap-2">
                   <Settings className="w-4 h-4 text-gray-500" />
                   <span className="text-sm">Settings</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 asChild
-                className="rounded-[8px] cursor-pointer focus:bg-gray-50"
+                className="rounded-xl cursor-pointer focus:bg-gray-50"
               >
                 <Link href="/notifications" className="flex items-center gap-2">
                   <Bell className="w-4 h-4 text-gray-500" />
@@ -292,7 +286,7 @@ export function Sidebar({ user }: SidebarProps) {
             <DropdownMenuSeparator className="bg-gray-100 my-1" />
             <DropdownMenuItem
               onClick={handleLogout}
-              className="rounded-[8px] cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-600"
+              className="rounded-xl cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-600"
             >
               <LogOut className="w-4 h-4 mr-2" />
               <span className="text-sm font-medium">Log out</span>

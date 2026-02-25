@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { Building2, User } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Building2, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export type UserRole = "landlord" | "tenant"
+export type UserRole = "landlord" | "tenant";
 
 interface RoleTabsProps {
-  value: UserRole
-  onChange: (role: UserRole) => void
+  value: UserRole;
+  onChange: (role: UserRole) => void;
 }
 
 const roles: { value: UserRole; label: string; icon: React.ReactNode }[] = [
@@ -21,7 +21,7 @@ const roles: { value: UserRole; label: string; icon: React.ReactNode }[] = [
     label: "Tenant",
     icon: <User className="w-4 h-4" />,
   },
-]
+];
 
 export function RoleTabs({ value, onChange }: RoleTabsProps) {
   return (
@@ -38,12 +38,12 @@ export function RoleTabs({ value, onChange }: RoleTabsProps) {
           aria-selected={value === role.value}
           onClick={() => onChange(role.value)}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 h-10 rounded-[8px]",
+            "flex-1 flex items-center justify-center gap-2 h-10 rounded-xl",
             "text-sm font-semibold transition-all duration-200",
             "min-h-[44px]",
             value === role.value
               ? "bg-white text-blue-600 shadow-sm border border-gray-200"
-              : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
+              : "text-gray-500 hover:text-gray-700 hover:bg-white/50",
           )}
         >
           {role.icon}
@@ -51,5 +51,5 @@ export function RoleTabs({ value, onChange }: RoleTabsProps) {
         </button>
       ))}
     </div>
-  )
+  );
 }

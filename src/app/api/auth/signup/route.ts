@@ -12,6 +12,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!phone) {
+      return NextResponse.json(
+        { error: "Phone number is required" },
+        { status: 400 },
+      );
+    }
+
+    const nigerianPhoneRegex = /^(?:(?:\+234)|0)(?:70|80|81|82|83|90|91)\d{8}$/;
+    if (!nigerianPhoneRegex.test(phone)) {
+      return NextResponse.json(
+        { error: "Please enter a valid Nigerian phone number" },
+        { status: 400 },
+      );
+    }
+
     const { supabase } = createServerClient(req);
 
     const { data, error } = await supabase.auth.signUp({

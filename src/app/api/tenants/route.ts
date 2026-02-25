@@ -94,14 +94,14 @@ export async function GET(req: NextRequest) {
   }, { status: 200 })
 }
 
-// POST /api/tenants — invite tenant by email
+// POST /api/tenants — invite tenant by phone
 export async function POST(req: NextRequest) {
   const supabase = await createServerClient()
   const userId = await getUserId(supabase)
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { email, unitId, startDate } = await req.json()
-  if (!email?.trim()) return NextResponse.json({ error: "Tenant email is required." }, { status: 400 })
+  const { phone, unitId, startDate } = await req.json()
+  if (!phone?.trim()) return NextResponse.json({ error: "Tenant phone is required." }, { status: 400 })
   if (!unitId) return NextResponse.json({ error: "Please select a unit." }, { status: 400 })
 
   // Verify unit belongs to landlord
@@ -124,11 +124,11 @@ export async function POST(req: NextRequest) {
 
   if (existing) return NextResponse.json({ error: "This unit is already occupied." }, { status: 409 })
 
-  // Look up tenant by email in profiles
+  // Look up tenant by phone in profiles
   const { data: tenantProfile } = await supabase
     .from("profiles")
     .select("id, full_name")
-    .eq("email", email.toLowerCase().trim())
+    .eq("phone_number", phone.trim())
     .single()
 
   if (!tenantProfile) {

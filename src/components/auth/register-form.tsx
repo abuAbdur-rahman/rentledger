@@ -54,8 +54,10 @@ function validate(values: FormValues): FormErrors {
     errors.password = "Password must be at least 8 characters.";
   }
 
-  if (values.phone && !/^\+?[\d\s\-()]{7,15}$/.test(values.phone)) {
-    errors.phone = "Please enter a valid phone number.";
+  if (!values.phone.trim()) {
+    errors.phone = "Phone number is required.";
+  } else if (!/^(?:(?:\+234)|0)(?:70|80|81|82|83|90|91)\d{8}$/.test(values.phone.trim())) {
+    errors.phone = "Please enter a valid Nigerian phone number.";
   }
 
   return errors;
@@ -215,9 +217,9 @@ export function RegisterForm() {
         <div className="relative">
           <AuthField
             id="phone"
-            label="Phone Number (Optional)"
+            label="Phone Number"
             type="tel"
-            placeholder="08100000000"
+            placeholder="e.g. 08012345678"
             autoComplete="tel"
             value={values.phone}
             onChange={handleChange("phone")}

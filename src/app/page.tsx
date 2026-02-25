@@ -30,13 +30,21 @@ interface StepProps {
 
 // ─── Sub-components (Server Components) ─────────────────────────────────────
 
-function FeatureCard({ icon, iconBg, title, description, bullets }: FeatureCardProps) {
+function FeatureCard({
+  icon,
+  iconBg,
+  title,
+  description,
+  bullets,
+}: FeatureCardProps) {
   return (
-    <Card className="group relative overflow-hidden border border-gray-200 rounded-[12px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 bg-white">
+    <Card className="group relative overflow-hidden border border-gray-200 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 bg-white">
       {/* Top gradient bar on hover */}
       <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 to-violet-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
       <CardHeader className="pb-0 pt-8 px-8">
-        <div className={`w-14 h-14 rounded-[14px] flex items-center justify-center mb-6 ${iconBg}`}>
+        <div
+          className={`w-14 h-14 rounded-[14px] flex items-center justify-center mb-6 ${iconBg}`}
+        >
           {icon}
         </div>
         <h3 className="text-lg font-bold text-gray-900 mb-3">{title}</h3>
@@ -47,7 +55,10 @@ function FeatureCard({ icon, iconBg, title, description, bullets }: FeatureCardP
       <CardContent className="px-8 pb-8">
         <ul className="mt-5 space-y-2">
           {bullets.map((b) => (
-            <li key={b} className="flex items-center gap-2 text-sm text-gray-700">
+            <li
+              key={b}
+              className="flex items-center gap-2 text-sm text-gray-700"
+            >
               <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
               {b}
             </li>
@@ -61,7 +72,7 @@ function FeatureCard({ icon, iconBg, title, description, bullets }: FeatureCardP
 function Step({ num, title, description }: StepProps) {
   return (
     <div className="text-center">
-      <div className="w-12 h-12 rounded-[12px] bg-gradient-to-br from-blue-500 to-violet-500 text-white text-lg font-extrabold flex items-center justify-center mx-auto mb-4">
+      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-500 text-white text-lg font-extrabold flex items-center justify-center mx-auto mb-4">
         {num}
       </div>
       <h4 className="text-base font-bold text-gray-900 mb-2">{title}</h4>
@@ -82,18 +93,22 @@ function DashboardPreview() {
         <div className="absolute top-[-60px] right-[-60px] w-56 h-56 bg-violet-200/30 rounded-full blur-3xl pointer-events-none" />
 
         {/* Revenue card */}
-        <Card className="rounded-[12px] border border-gray-200 shadow-md bg-white min-w-[180px] flex-1 max-w-[220px]">
+        <Card className="rounded-2xl border border-gray-200 shadow-md bg-white min-w-[180px] flex-1 max-w-[220px]">
           <CardContent className="p-5">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-[8px] bg-blue-50 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-blue-500" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-900 leading-none">Total Revenue</p>
+                <p className="text-xs font-semibold text-gray-900 leading-none">
+                  Total Revenue
+                </p>
                 <p className="text-xs text-gray-400 mt-0.5">This month</p>
               </div>
             </div>
-            <p className="text-2xl font-extrabold tracking-tight text-gray-900">₦420,000</p>
+            <p className="text-2xl font-extrabold tracking-tight text-gray-900">
+              ₦420,000
+            </p>
             <Badge className="mt-2 text-[10px] font-semibold bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-full">
               ↑ 12% vs last month
             </Badge>
@@ -101,26 +116,47 @@ function DashboardPreview() {
         </Card>
 
         {/* Payments list card */}
-        <Card className="rounded-[12px] border border-gray-200 shadow-md bg-white min-w-[220px] flex-1 max-w-[280px]">
+        <Card className="rounded-2xl border border-gray-200 shadow-md bg-white min-w-[220px] flex-1 max-w-[280px]">
           <CardContent className="p-5">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-[8px] bg-violet-50 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
                 <CreditCard className="w-5 h-5 text-violet-500" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-900 leading-none">Recent Payments</p>
+                <p className="text-xs font-semibold text-gray-900 leading-none">
+                  Recent Payments
+                </p>
                 <p className="text-xs text-gray-400 mt-0.5">All units</p>
               </div>
             </div>
             <div className="space-y-0 divide-y divide-gray-100">
               {[
-                { name: "Unit 4A · Emeka", status: "Paid", color: "bg-green-100 text-green-700" },
-                { name: "Unit 2B · Fatima", status: "Pending", color: "bg-amber-100 text-amber-700" },
-                { name: "Unit 1C · Chidi", status: "Overdue", color: "bg-red-100 text-red-700" },
+                {
+                  name: "Unit 4A · Emeka",
+                  status: "Paid",
+                  color: "bg-green-100 text-green-700",
+                },
+                {
+                  name: "Unit 2B · Fatima",
+                  status: "Pending",
+                  color: "bg-amber-100 text-amber-700",
+                },
+                {
+                  name: "Unit 1C · Chidi",
+                  status: "Overdue",
+                  color: "bg-red-100 text-red-700",
+                },
               ].map((row) => (
-                <div key={row.name} className="flex items-center justify-between py-2.5">
-                  <span className="text-[0.8125rem] font-medium text-gray-700">{row.name}</span>
-                  <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${row.color}`}>
+                <div
+                  key={row.name}
+                  className="flex items-center justify-between py-2.5"
+                >
+                  <span className="text-[0.8125rem] font-medium text-gray-700">
+                    {row.name}
+                  </span>
+                  <span
+                    className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${row.color}`}
+                  >
                     {row.status}
                   </span>
                 </div>
@@ -130,18 +166,22 @@ function DashboardPreview() {
         </Card>
 
         {/* Outstanding card */}
-        <Card className="rounded-[12px] border border-gray-200 shadow-md bg-white min-w-[180px] flex-1 max-w-[220px]">
+        <Card className="rounded-2xl border border-gray-200 shadow-md bg-white min-w-[180px] flex-1 max-w-[220px]">
           <CardContent className="p-5">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-[8px] bg-green-50 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
                 <Users className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-900 leading-none">Outstanding</p>
+                <p className="text-xs font-semibold text-gray-900 leading-none">
+                  Outstanding
+                </p>
                 <p className="text-xs text-gray-400 mt-0.5">Needs attention</p>
               </div>
             </div>
-            <p className="text-2xl font-extrabold tracking-tight text-gray-900">₦85,000</p>
+            <p className="text-2xl font-extrabold tracking-tight text-gray-900">
+              ₦85,000
+            </p>
             <Badge className="mt-2 text-[10px] font-semibold bg-red-100 text-red-700 hover:bg-red-100 border-0 rounded-full">
               3 overdue units
             </Badge>
@@ -229,7 +269,7 @@ export default function LandingPage() {
                   {item.label}
                 </p>
               </div>
-            )
+            ),
           )}
         </div>
       </section>
@@ -256,21 +296,33 @@ export default function LandingPage() {
             iconBg="bg-gradient-to-br from-blue-50 to-blue-100"
             title="Track Properties"
             description="Manage multiple properties and units from a single clean dashboard. Add tenants, set rent amounts, and track occupancy in seconds."
-            bullets={["Multi-property management", "Unit-level tracking", "Tenant assignment & history"]}
+            bullets={[
+              "Multi-property management",
+              "Unit-level tracking",
+              "Tenant assignment & history",
+            ]}
           />
           <FeatureCard
             icon={<CreditCard className="w-7 h-7 text-violet-500" />}
             iconBg="bg-gradient-to-br from-violet-50 to-violet-100"
             title="Monitor Payments"
             description="Automatically track paid, pending, and overdue payments. See your total revenue and outstanding balances at a glance."
-            bullets={["Auto overdue detection", "Monthly revenue summary", "Full payment history"]}
+            bullets={[
+              "Auto overdue detection",
+              "Monthly revenue summary",
+              "Full payment history",
+            ]}
           />
           <FeatureCard
             icon={<Users className="w-7 h-7 text-green-600" />}
             iconBg="bg-gradient-to-br from-green-50 to-green-100"
             title="Reduce Disputes"
             description="Give tenants clear visibility into their rent status, due dates, and payment history. Transparency eliminates arguments."
-            bullets={["Tenant self-service portal", "Clear due date reminders", "Shared payment records"]}
+            bullets={[
+              "Tenant self-service portal",
+              "Clear due date reminders",
+              "Shared payment records",
+            ]}
           />
         </div>
       </section>
@@ -288,10 +340,26 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10">
-          <Step num="1" title="Create Account" description="Sign up as a landlord or tenant. Your role determines your dashboard experience." />
-          <Step num="2" title="Add Properties" description="Landlords add properties, create units, and set monthly rent amounts and due dates." />
-          <Step num="3" title="Assign Tenants" description="Link tenants to units. They instantly get access to their personal rent dashboard." />
-          <Step num="4" title="Track Everything" description="Mark payments, view overdue status, and watch your financial dashboard update in real time." />
+          <Step
+            num="1"
+            title="Create Account"
+            description="Sign up as a landlord or tenant. Your role determines your dashboard experience."
+          />
+          <Step
+            num="2"
+            title="Add Properties"
+            description="Landlords add properties, create units, and set monthly rent amounts and due dates."
+          />
+          <Step
+            num="3"
+            title="Assign Tenants"
+            description="Link tenants to units. They instantly get access to their personal rent dashboard."
+          />
+          <Step
+            num="4"
+            title="Track Everything"
+            description="Mark payments, view overdue status, and watch your financial dashboard update in real time."
+          />
         </div>
       </section>
 
@@ -305,8 +373,8 @@ export default function LandingPage() {
           Start tracking rent the right way
         </h2>
         <p className="relative font-[Roboto,sans-serif] text-[1.0625rem] text-white/60 max-w-[440px] mx-auto mb-10 leading-[1.7]">
-          Join landlords and tenants who&apos;ve eliminated rent confusion for good.
-          Free to get started.
+          Join landlords and tenants who&apos;ve eliminated rent confusion for
+          good. Free to get started.
         </p>
         <div className="relative flex items-center justify-center gap-3 flex-wrap">
           <Link href="/auth/register">
@@ -334,8 +402,11 @@ export default function LandingPage() {
       <footer className="border-t border-gray-200 px-6 py-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-gray-900">
-            <div className="w-8 h-8 rounded-[8px] bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-bold text-gray-900"
+          >
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center">
               <Home className="w-4 h-4 text-white" />
             </div>
             RentLedger

@@ -1,34 +1,34 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import type { RecentPayment } from "@/services/dashboard"
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import type { RecentPayment } from "@/services/dashboard";
 
 function formatCurrency(amount: number) {
-  return `₦${amount.toLocaleString()}`
+  return `₦${amount.toLocaleString()}`;
 }
 
 function formatDate(dateStr: string) {
-  const date = new Date(dateStr)
+  const date = new Date(dateStr);
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-  })
+  });
 }
 
 interface RecentPaymentsProps {
-  payments: RecentPayment[] | null
-  loading?: boolean
+  payments: RecentPayment[] | null;
+  loading?: boolean;
 }
 
 export function RecentPayments({ payments, loading }: RecentPaymentsProps) {
   if (loading) {
     return (
-      <Card className="rounded-[12px]">
+      <Card className="rounded-2xl">
         <CardHeader className="pb-2">
           <Skeleton className="w-32 h-5" />
         </CardHeader>
@@ -47,14 +47,16 @@ export function RecentPayments({ payments, loading }: RecentPaymentsProps) {
           ))}
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (!payments || payments.length === 0) {
     return (
-      <Card className="rounded-[12px]">
+      <Card className="rounded-2xl">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold">Recent Payments</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Recent Payments
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-500 text-center py-8">
@@ -62,19 +64,21 @@ export function RecentPayments({ payments, loading }: RecentPaymentsProps) {
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   const statusStyles = {
     paid: "bg-green-100 text-green-700",
     pending: "bg-amber-100 text-amber-700",
     overdue: "bg-red-100 text-red-700",
-  }
+  };
 
   return (
-    <Card className="rounded-[12px]">
+    <Card className="rounded-2xl">
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <CardTitle className="text-base font-semibold">Recent Payments</CardTitle>
+        <CardTitle className="text-base font-semibold">
+          Recent Payments
+        </CardTitle>
         <Link
           href="/payments"
           className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
@@ -108,7 +112,7 @@ export function RecentPayments({ payments, loading }: RecentPaymentsProps) {
               <Badge
                 className={cn(
                   "text-[10px] font-semibold px-2 py-0.5 rounded-full border-0",
-                  statusStyles[payment.status]
+                  statusStyles[payment.status],
                 )}
               >
                 {payment.status}
@@ -118,5 +122,5 @@ export function RecentPayments({ payments, loading }: RecentPaymentsProps) {
         ))}
       </CardContent>
     </Card>
-  )
+  );
 }

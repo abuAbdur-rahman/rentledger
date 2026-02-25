@@ -110,7 +110,7 @@ export function NotificationBell() {
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="w-80 rounded-[12px] border border-gray-200 shadow-xl shadow-gray-200/60 p-0"
+        className="w-80 rounded-2xl border border-gray-200 shadow-xl shadow-gray-200/60 p-0"
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <DropdownMenuLabel className="p-0 font-semibold text-gray-900">
