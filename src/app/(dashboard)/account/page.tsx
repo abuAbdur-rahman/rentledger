@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios, { AxiosError } from "axios";
 import {
   User,
   Mail,
@@ -39,64 +38,45 @@ import {
 } from "@/components/ui/select";
 import { TopBar } from "@/components/dashboard/top-bar";
 import { useSessionUser } from "@/components/auth/auth-context";
+import { useProfile, useUpdateProfile, useChangePassword } from "@/hooks";
 import { toast } from "sonner";
-
-interface ProfileData {
-  id: string;
-  email: string;
-  full_name: string | null;
-  phone_number: string | null;
-  role: "landlord" | "tenant";
-  created_at: string | null;
-}
 
 const NOTIFICATION_REFRESH_KEY = "rl_notification_refresh_interval";
 const DEFAULT_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 function ProfileTab() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const { data: profile, isLoading } = useProfile();
+  const updateProfile = useUpdateProfile();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    full_name: "",
-    phone_number: "",
+  const [formData, setFormData] = useState<{ full_name: string; phone_number: string }>(() => {
+    if (profile) {
+      return {
+        full_name: profile.full_name || "",
+        phone_number: profile.phone_number || "",
+      };
+    }
+    return { full_name: "", phone_number: "" };
   });
 
+  // Update formData when profile changes (only when not editing)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const { data } = await axios.get("/api/profile");
-      if (data.profile) {
-        setProfile(data.profile);
-        setFormData({
-          full_name: data.profile.full_name || "",
-          phone_number: data.profile.phone_number || "",
-        });
-      }
-    } catch {
-      toast.error("Failed to load profile");
-    } finally {
-      setLoading(false);
+    if (profile && !isEditing) {
+      setFormData({
+        full_name: profile.full_name || "",
+        phone_number: profile.phone_number || "",
+      });
     }
-  };
+  }, [profile, isEditing]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     try {
-      const { data } = await axios.patch("/api/profile", formData);
-      setProfile(data.profile);
+      await updateProfile.mutateAsync(formData);
       toast.success("Profile updated successfully");
       setIsEditing(false);
-    } catch (err) {
-      const e = err as AxiosError<{ error: string }>;
-      toast.error(e.response?.data?.error ?? "Failed to update profile");
-    } finally {
-      setSaving(false);
+    } catch {
+      toast.error("Failed to update profile");
     }
   };
 
@@ -108,7 +88,7 @@ function ProfileTab() {
     setIsEditing(false);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -241,16 +221,16 @@ function ProfileTab() {
             <div className="pt-4 flex gap-3">
               <Button
                 type="submit"
-                disabled={saving}
+                disabled={updateProfile.isPending}
                 onClick={handleSubmit}
                 className="flex-1 h-11 rounded-[10px] bg-blue-500 hover:bg-blue-600 text-white font-semibold gap-2"
               >
-                {saving ? (
+                {updateProfile.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <CheckCircle className="w-4 h-4" />
                 )}
-                {saving ? "Saving..." : "Save Changes"}
+                {updateProfile.isPending ? "Saving..." : "Save Changes"}
               </Button>
               <Button
                 type="button"
@@ -270,7 +250,7 @@ function ProfileTab() {
 }
 
 function PasswordTab() {
-  const [loading, setLoading] = useState(false);
+  const changePassword = useChangePassword();
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -295,11 +275,10 @@ function PasswordTab() {
       return;
     }
 
-    setLoading(true);
     try {
-      await axios.post("/api/profile/change-password", {
-        current_password: formData.current_password,
-        new_password: formData.new_password,
+      await changePassword.mutateAsync({
+        currentPassword: formData.current_password,
+        newPassword: formData.new_password,
       });
       toast.success("Password changed successfully");
       setSuccess(true);
@@ -308,11 +287,8 @@ function PasswordTab() {
         new_password: "",
         confirm_password: "",
       });
-    } catch (err) {
-      const e = err as AxiosError<{ error: string }>;
-      toast.error(e.response?.data?.error ?? "Failed to change password");
-    } finally {
-      setLoading(false);
+    } catch {
+      toast.error("Failed to change password");
     }
   };
 
@@ -423,15 +399,15 @@ function PasswordTab() {
           <div className="pt-4">
             <Button
               type="submit"
-              disabled={loading}
+              disabled={changePassword.isPending}
               className="w-full h-11 rounded-[10px] bg-blue-500 hover:bg-blue-600 text-white font-semibold gap-2"
             >
-              {loading ? (
+              {changePassword.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Lock className="w-4 h-4" />
               )}
-              {loading ? "Changing Password..." : "Change Password"}
+              {changePassword.isPending ? "Changing Password..." : "Change Password"}
             </Button>
           </div>
         </form>
