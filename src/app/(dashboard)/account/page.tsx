@@ -441,17 +441,18 @@ function PasswordTab() {
 }
 
 function SettingsTab() {
-  const [refreshInterval, setRefreshInterval] = useState(DEFAULT_REFRESH_INTERVAL);
-
-  useEffect(() => {
+  const getInitialInterval = () => {
+    if (typeof window === "undefined") return DEFAULT_REFRESH_INTERVAL;
     const stored = localStorage.getItem(NOTIFICATION_REFRESH_KEY);
     if (stored) {
       const interval = parseInt(stored, 10);
       if (!isNaN(interval) && interval >= 0) {
-        setRefreshInterval(interval);
+        return interval;
       }
     }
-  }, []);
+    return DEFAULT_REFRESH_INTERVAL;
+  };
+  const [refreshInterval, setRefreshInterval] = useState(getInitialInterval);
 
   const handleRefreshIntervalChange = (minutes: string) => {
     const mins = parseInt(minutes, 10);
