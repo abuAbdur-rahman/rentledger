@@ -1,14 +1,38 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import axios from "axios"
 import { SummaryCards } from "@/components/dashboard/summary-cards"
 import { RecentPayments } from "@/components/dashboard/recent-payments"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import type { DashboardSummary } from "@/services/dashboard"
 
-interface LandlordDashboardProps {
-  summary: DashboardSummary | null
-  loading?: boolean
-}
+export function LandlordDashboard() {
+  const [summary, setSummary] = useState<DashboardSummary | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-export function LandlordDashboard({ summary, loading }: LandlordDashboardProps) {
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const token = typeof window !== "undefined" 
+          ? sessionStorage.getItem("rl_access_token")
+          : null
+        const { data } = await axios.get("/api/dashboard/summary", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        })
+        setSummary(data.summary)
+      } catch (err) {
+        console.error("Failed to fetch dashboard summary:", err)
+        setError("Failed to load dashboard")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSummary()
+  }, [])
+
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Header */}

@@ -162,8 +162,33 @@ export async function GET() {
         .filter((p) => p.status === "paid")
         .reduce((sum, p) => sum + p.amount, 0)
 
-      const pendingPayments = recentPayments.filter((p) => p.status === "pending").length
-      const overduePayments = recentPayments.filter((p) => p.status === "overdue").length
+      // Get all payments count for pending/overdue
+      const { data: allPayments } = await supabase
+        .from("payments")
+        .select(`
+          id,
+          amount,
+          status,
+          payment_date,
+          tenancies!inner (
+            next_due_date
+          )
+        `)
+        .eq("tenancies.units.properties.landlord_id", user.id)
+
+      let pendingPayments = 0
+      let overduePayments = 0
+
+      for (const p of (allPayments ?? [])) {
+        const dueDate = new Date(p.tenancies?.next_due_date ?? "")
+        if (p.status === "verified") {
+          // paid - don't count
+        } else if (dueDate < now) {
+          overduePayments++
+        } else {
+          pendingPayments++
+        }
+      }
 
       return NextResponse.json({
         role,

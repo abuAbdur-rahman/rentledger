@@ -17,13 +17,13 @@ const landlordNav = [
   { href: "/properties", label: "Properties", icon: Building2 },
   { href: "/tenants", label: "Tenants", icon: Users },
   { href: "/payments", label: "Payments", icon: CreditCard },
-  { href: "/profile", label: "Profile", icon: User },
+  { href: "/account", label: "Account", icon: User },
 ];
 
 const tenantNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/history", label: "History", icon: History },
-  { href: "/profile", label: "Profile", icon: User },
+  { href: "/account", label: "Account", icon: User },
 ];
 
 export function BottomNav({ role }: { role?: "landlord" | "tenant" }) {

@@ -10,6 +10,13 @@ import { Card, CardContent }                       from "@/components/ui/card"
 import { Skeleton }                                from "@/components/ui/skeleton"
 import { Alert, AlertTitle, AlertDescription }     from "@/components/ui/alert"
 import { Button }                                  from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet"
 import { fmtCurrency, fmtDate, fmtMonth, StatusBadge } from "@/components/tenant/ui-kit"
 import type { TenantPayment, TenantHistoryResponse } from "@/types/tenant"
 
@@ -71,11 +78,14 @@ function SummaryChips({ payments }: { payments: TenantPayment[] }) {
   )
 }
 
-function HistoryRow({ p }: { p: TenantPayment }) {
+function HistoryRow({ p, onClick }: { p: TenantPayment; onClick?: () => void }) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="px-5 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+    <div 
+      className="px-5 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors cursor-pointer"
+      onClick={onClick}
+    >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 bg-gray-100 rounded-xl flex flex-col items-center justify-center shrink-0 gap-0">
           <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 leading-none">
@@ -154,6 +164,7 @@ export default function TenantHistoryPage() {
   const [page,        setPage]        = useState(1)
   const [total,       setTotal]       = useState(0)
   const [hasTenancy,  setHasTenancy]  = useState(true)
+  const [selectedPayment, setSelectedPayment] = useState<TenantPayment | null>(null)
 
   const fetchPage = useCallback(async (pg: number, append = false) => {
     if (append) {
@@ -258,7 +269,7 @@ export default function TenantHistoryPage() {
                 </div>
               </div>
               <CardContent className="p-0">
-                {payments.map(p => <HistoryRow key={p.id} p={p} />)}
+                {payments.map(p => <HistoryRow key={p.id} p={p} onClick={() => setSelectedPayment(p)} />)}
 
                 {hasMore && (
                   <div className="px-5 py-4 border-t border-gray-100">
@@ -281,6 +292,74 @@ export default function TenantHistoryPage() {
           </div>
         )}
       </div>
+
+      <Sheet open={!!selectedPayment} onOpenChange={(v) => !v && setSelectedPayment(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+          {selectedPayment && (
+            <>
+              <SheetHeader>
+                <SheetTitle>Payment Details</SheetTitle>
+                <SheetDescription>
+                  Your payment information and proof
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Amount</p>
+                    <p className="text-lg font-bold text-gray-900">{fmtCurrency(selectedPayment.amount)}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                    <StatusBadge status={selectedPayment.status} />
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Due Date</p>
+                    <p className="text-sm font-semibold text-gray-900">{fmtDate(selectedPayment.dueDate)}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Paid On</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {selectedPayment.paidAt ? fmtDate(selectedPayment.paidAt) : "—"}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedPayment.reference && (
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Reference</p>
+                    <p className="text-sm font-mono text-gray-900">{selectedPayment.reference}</p>
+                  </div>
+                )}
+
+                {selectedPayment.status === "rejected" && selectedPayment.rejectionReason && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                    <p className="text-xs text-red-500 uppercase tracking-wider mb-1">Rejection Reason</p>
+                    <p className="text-sm text-red-700">{selectedPayment.rejectionReason}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Payment Proof</p>
+                  {selectedPayment.proofUrl ? (
+                    <div className="rounded-xl border border-gray-200 overflow-hidden">
+                      <img
+                        src={selectedPayment.proofUrl}
+                        alt="Payment proof"
+                        className="w-full h-auto max-h-[300px] object-contain bg-gray-50"
+                      />
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-gray-200 p-8 text-center">
+                      <p className="text-sm text-gray-400">No payment proof submitted</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

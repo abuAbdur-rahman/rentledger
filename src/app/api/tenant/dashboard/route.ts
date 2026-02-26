@@ -1,44 +1,45 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@/lib/supabase/server"
-import { getUser } from "@/services/user"
+import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@/lib/supabase/server";
+import { getUser } from "@/services/user";
 import type {
   TenantDashboardResponse,
   TenantRentInfo,
   TenantPayment,
   PaymentStatus,
-} from "@/types/tenant"
+  TenantTenancyItem,
+} from "@/types/tenant";
 
-function deriveStatus(dbStatus: string, dueDate: string): PaymentStatus {
-  if (dbStatus === "verified") return "paid"
-  if (dbStatus === "rejected") return "rejected"
-  return new Date(dueDate) < new Date() ? "overdue" : "pending"
+function deriveStatus(dbStatus: string, dueDate: string | null): PaymentStatus {
+  if (dbStatus === "verified") return "paid";
+  if (dbStatus === "rejected") return "rejected";
+  return new Date(dueDate ?? "") < new Date() ? "overdue" : "pending";
 }
 
 function nextDueDateFunc(nextDueDateStr: string) {
-  const due = new Date(nextDueDateStr)
-  const now = new Date()
+  const due = new Date(nextDueDateStr);
+  const now = new Date();
   if (due <= now) {
-    due.setMonth(due.getMonth() + 1)
+    due.setMonth(due.getMonth() + 1);
   }
-  return due
+  return due;
 }
 
 async function getAuthedUser() {
-  const userData = await getUser()
-  if (!userData || userData.role !== "tenant") return null
-  return userData
+  const userData = await getUser();
+  if (!userData || userData.role !== "tenant") return null;
+  return userData;
 }
 
 export async function GET() {
-  const user = await getAuthedUser()
+  const user = await getAuthedUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const supabase = await createServerClient()
+    const supabase = await createServerClient();
 
-    const { data: tenancy, error: tenancyError } = await supabase
+    const { data: allTenancies, error: tenanciesError } = await supabase
       .from("tenancies")
       .select(
         `
@@ -60,98 +61,129 @@ export async function GET() {
       `,
       )
       .eq("tenant_id", user.id)
-      .eq("status", "active")
-      .single()
+      .order("created_at", { ascending: false });
 
-    if (tenancyError || !tenancy) {
-      return NextResponse.json({
-        hasTenancy: false,
-        rentInfo: null,
-        recentPayments: [],
-      } satisfies TenantDashboardResponse)
+    console.log("All Tenancies", allTenancies);
+
+    if (tenanciesError) {
+      console.error("Tenancies error:", tenanciesError);
     }
 
-    const unit = (tenancy as unknown as { unit: { name: string; rent_amount: number; property: { name: string; address: string | null } } }).unit
-    const property = unit?.property
-    const nextDueDate = tenancy.next_due_date ?? ""
+    const tenanciesList: TenantTenancyItem[] = (allTenancies ?? []).map(
+      (t: any) => ({
+        id: t.id,
+        status: t.status,
+        startDate: t.start_date,
+        unitLabel: `Unit ${t.unit?.name ?? "—"}`,
+        propertyName: t.unit?.property?.name ?? "Property",
+        propertyAddress: t.unit?.property?.address ?? "",
+        rentAmount: t.unit?.rent_amount ?? 0,
+      }),
+    );
 
-    const dueDate = new Date(nextDueDate)
-    const now = new Date()
-    const daysUntilDue = Math.ceil(
-      (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-    )
+    const activeTenancy = (allTenancies ?? []).find(
+      (t: any) => t.status === "active",
+    );
+    const hasActiveTenancy = !!activeTenancy;
 
-interface PaymentRow {
-  id: string
-  amount: number
-  status: string
-  payment_date: string | null
-  reference: string | null
-  proof_url: string | null
-  rejection_reason: string | null
-}
+    if (!activeTenancy) {
+      return NextResponse.json({
+        hasActiveTenancy: false,
+        rentInfo: null,
+        recentPayments: [],
+        tenancies: tenanciesList,
+      } satisfies TenantDashboardResponse);
+    }
 
-const { data: paymentsRaw } = await supabase
-  .from("payments")
-  .select("id, amount, status, payment_date, reference, proof_url, rejection_reason")
-  .eq("tenancy_id", tenancy.id)
-  .order("created_at", { ascending: false })
-  .limit(5) as { data: PaymentRow[] | null }
+    const tenancyWithUnit = activeTenancy as any;
+    const unit = tenancyWithUnit.unit;
+    const property = unit?.property;
+    const nextDueDate = tenancyWithUnit.next_due_date ?? "";
 
-const latestPayment = paymentsRaw?.[0]
+    const dueDate = nextDueDate ? new Date(nextDueDate) : new Date();
+    const now = new Date();
+    const daysUntilDue = nextDueDate
+      ? Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    const { data: paymentsRaw } = await supabase
+      .from("payments")
+      .select("id, amount, status, payment_date, reference, proof_url")
+      .eq("tenancy_id", activeTenancy.id)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    const latestPayment = paymentsRaw?.[0];
     const currentStatus: PaymentStatus = latestPayment
-      ? deriveStatus(latestPayment.status, nextDueDate)
+      ? deriveStatus(latestPayment.status ?? "pending", nextDueDate)
       : daysUntilDue < 0
         ? "overdue"
-        : "pending"
+        : "pending";
 
     const rentInfo: TenantRentInfo = {
-      tenancyId: tenancy.id,
+      tenancyId: activeTenancy.id,
       unitLabel: `Unit ${unit?.name ?? "—"}`,
       propertyName: property?.name ?? "Property",
       propertyAddress: property?.address ?? "",
       rentAmount: unit?.rent_amount ?? 0,
-      nextDueDate: nextDueDateFunc(nextDueDate).toISOString(),
+      nextDueDate: nextDueDate || new Date().toISOString(),
       daysUntilDue,
       currentPaymentStatus: currentStatus,
       currentPaymentId: latestPayment?.id ?? null,
-    }
+    };
 
-    const recentPayments: TenantPayment[] = (paymentsRaw ?? []).map((p) => ({
-      id: p.id,
-      amount: p.amount ?? 0,
-      status: deriveStatus(p.status, nextDueDate),
-      dueDate: nextDueDate,
-      paidAt: p.payment_date ?? null,
-      reference: p.reference ?? null,
-      proofUrl: p.proof_url ?? null,
-      rejectionReason: p.rejection_reason ?? null,
-    }))
+    const recentPayments: TenantPayment[] = (paymentsRaw ?? []).map(
+      (p: any) => ({
+        id: p.id,
+        amount: p.amount ?? 0,
+        status: deriveStatus(p.status ?? "pending", nextDueDate),
+        dueDate: nextDueDate || new Date().toISOString(),
+        paidAt: p.payment_date ?? null,
+        reference: p.reference ?? null,
+        proofUrl: p.proof_url ?? null,
+        rejectionReason: null,
+      }),
+    );
 
     return NextResponse.json({
-      hasTenancy: true,
+      hasActiveTenancy,
       rentInfo,
       recentPayments,
-    } satisfies TenantDashboardResponse)
+      tenancies: tenanciesList,
+    } satisfies TenantDashboardResponse);
   } catch (err) {
-    console.error("[GET /api/tenant/dashboard]", err)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("[GET /api/tenant/dashboard]", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getAuthedUser()
+  const user = await getAuthedUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  let uploadedUrl: string | null = null;
+  let fileNameToDelete: string | null = null;
+
   try {
-    const supabase = await createServerClient()
-    const body = await req.json()
-    const { tenancyId, paymentId, reference, proofUrl, amount } = body
+    const supabase = await createServerClient();
+    
+    const formData = await req.formData();
+    const tenancyId = formData.get("tenancyId") as string;
+    const paymentId = formData.get("paymentId") as string | null;
+    const reference = formData.get("reference") as string | null;
+    const amount = formData.get("amount") as string | null;
+    const file = formData.get("file") as File | null;
 
     if (!tenancyId) {
-      return NextResponse.json({ error: "tenancyId required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "tenancyId required" },
+        { status: 400 },
+      );
     }
 
     const { data: tenancy } = await supabase
@@ -159,36 +191,87 @@ export async function POST(req: NextRequest) {
       .select("id, next_due_date")
       .eq("id", tenancyId)
       .eq("tenant_id", user.id)
-      .single()
+      .single();
 
     if (!tenancy) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (file && file.size > 0) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const fileExt = file.name.split(".").pop();
+      const newFileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("payment-proofs")
+        .upload(newFileName, buffer, {
+          contentType: file.type,
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        return NextResponse.json(
+          { error: "Failed to upload image" },
+          { status: 500 },
+        );
+      }
+
+      fileNameToDelete = newFileName;
+
+      const { data: urlData } = supabase.storage
+        .from("payment-proofs")
+        .getPublicUrl(newFileName);
+
+      uploadedUrl = urlData.publicUrl;
     }
 
     if (paymentId) {
-      await supabase
+      const { error: updateError } = await supabase
         .from("payments")
         .update({
           reference: reference ?? null,
-          proof_url: proofUrl ?? null,
+          proof_url: uploadedUrl ?? null,
           status: "pending",
         })
         .eq("id", paymentId)
-        .eq("tenancy_id", tenancyId)
+        .eq("tenancy_id", tenancyId);
+
+      if (updateError) {
+        throw updateError;
+      }
     } else {
-      await supabase.from("payments").insert({
+      const { error: insertError } = await supabase.from("payments").insert({
         tenancy_id: tenancyId,
-        amount: amount ?? 0,
+        amount: amount ? parseFloat(amount) : 0,
         status: "pending",
-        due_date: tenancy.next_due_date,
+        payment_date: new Date().toISOString().split("T")[0],
         reference: reference ?? null,
-        proof_url: proofUrl ?? null,
-      })
+        proof_url: uploadedUrl ?? null,
+      });
+
+      if (insertError) {
+        throw insertError;
+      }
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("[POST /api/tenant/dashboard]", err)
-    return NextResponse.json({ error: "Failed to submit payment" }, { status: 500 })
+    console.error("[POST /api/tenant/dashboard]", err);
+
+    if (uploadedUrl && fileNameToDelete) {
+      try {
+        const supabase = await createServerClient();
+        await supabase.storage.from("payment-proofs").remove([fileNameToDelete]);
+      } catch {
+        console.error("Failed to cleanup uploaded file");
+      }
+    }
+
+    return NextResponse.json(
+      { error: "Failed to submit payment" },
+      { status: 500 },
+    );
   }
 }
