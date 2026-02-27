@@ -72,7 +72,7 @@ export function TopBar({ title, user }: TopBarProps) {
               <button className="flex items-center gap-2 p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={user.avatarUrl} alt={user.name} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-violet-500 text-white text-xs font-bold">
+                  <AvatarFallback className="bg-linear-to-br from-blue-500 to-violet-500 text-white text-xs font-bold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import { Bell, CreditCard, MessageSquare, Info } from "lucide-react";
 import {
   DropdownMenu,
@@ -11,60 +10,28 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string | null;
-  type: "payment" | "system" | "message";
-  read: boolean;
-  created_at: string | null;
-}
+import { useNotifications, useMarkAsRead, useMarkAllAsRead } from "@/hooks";
 
 export function NotificationBell() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data: notifications = [], isLoading } = useNotifications(true);
+  const markAsRead = useMarkAsRead();
+  const markAllRead = useMarkAllAsRead();
 
-  const fetchNotifications = useCallback(async () => {
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const handleMarkAsRead = async (id: string) => {
     try {
-      const { data } = await axios.get("/api/notifications?unread=true");
-      setNotifications(data.notifications ?? []);
-      setUnreadCount(data.unreadCount ?? 0);
+      await markAsRead.mutateAsync(id);
     } catch {
-      // Silently fail
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchNotifications();
-    // const interval = setInterval(fetchNotifications, 30000)
-    // return () => clearInterval(interval)
-  }, [fetchNotifications]);
-
-  const markAsRead = async (id: string) => {
-    try {
-      await axios.patch("/api/notifications", { notification_id: id });
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-      );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch {
-      toast.error("Failed to mark as read");
+      // Silent fail
     }
   };
 
-  const markAllRead = async () => {
+  const handleMarkAllRead = async () => {
     try {
-      await axios.patch("/api/notifications", { mark_all_read: true });
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      setUnreadCount(0);
-      toast.success("All notifications marked as read");
+      await markAllRead.mutateAsync();
     } catch {
-      toast.error("Failed to mark all as read");
+      // Silent fail
     }
   };
 
@@ -118,7 +85,7 @@ export function NotificationBell() {
           </DropdownMenuLabel>
           {unreadCount > 0 && (
             <button
-              onClick={markAllRead}
+              onClick={handleMarkAllRead}
               className="text-xs text-blue-600 hover:text-blue-700 font-medium"
             >
               Mark all read
@@ -127,7 +94,7 @@ export function NotificationBell() {
         </div>
 
         <div className="max-h-96 overflow-y-auto">
-          {!loading && notifications.length === 0 && (
+          {!isLoading && notifications.length === 0 && (
             <div className="px-4 py-8 text-center">
               <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
               <p className="text-sm text-gray-500">No notifications yet</p>
@@ -138,7 +105,7 @@ export function NotificationBell() {
             <DropdownMenuItem
               key={notification.id}
               className="p-0 cursor-pointer"
-              onClick={() => !notification.read && markAsRead(notification.id)}
+              onClick={() => !notification.read && handleMarkAsRead(notification.id)}
             >
               <div
                 className={`flex items-start gap-3 px-4 py-3 w-full transition-colors ${

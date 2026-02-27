@@ -93,7 +93,7 @@ export function RecentPayments({ payments, loading }: RecentPaymentsProps) {
             className="flex items-center justify-between py-2"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white text-xs font-bold">
+              <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white text-xs font-bold">
                 {payment.tenantInitials}
               </div>
               <div>

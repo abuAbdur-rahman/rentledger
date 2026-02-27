@@ -93,7 +93,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-lg shadow-blue-200">
+              <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-lg shadow-blue-200">
                 <User className="w-10 h-10 text-white" />
               </div>
               <div>

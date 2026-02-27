@@ -1,14 +1,14 @@
-import Link from "next/link"
-import { Home } from "lucide-react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import Link from "next/link";
+import { Home } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface AuthCardProps {
-  title: string
-  subtitle: string
-  children: React.ReactNode
-  footerText: string
-  footerLinkText: string
-  footerLinkHref: string
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+  footerText: string;
+  footerLinkText: string;
+  footerLinkHref: string;
 }
 
 export function AuthCard({
@@ -20,11 +20,11 @@ export function AuthCard({
   footerLinkHref,
 }: AuthCardProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-violet-50/20 flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50/30 to-violet-50/20 flex flex-col items-center justify-center px-4 py-12">
       {/* Background decorative blobs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
-        <div className="absolute top-[-15%] right-[-10%] w-[500px] h-[500px] bg-blue-200/25 rounded-full blur-3xl" />
-        <div className="absolute bottom-[-15%] left-[-10%] w-[500px] h-[500px] bg-violet-200/20 rounded-full blur-3xl" />
+        <div className="absolute top-[-15%] right-[-10%] w-125 h-125 bg-blue-200/25 rounded-full blur-3xl" />
+        <div className="absolute bottom-[-15%] left-[-10%] w-125 h-125 bg-violet-200/20 rounded-full blur-3xl" />
       </div>
 
       {/* Logo */}
@@ -32,7 +32,7 @@ export function AuthCard({
         href="/"
         className="flex items-center gap-2.5 font-bold text-gray-900 text-[1.0625rem] mb-8 hover:opacity-80 transition-opacity"
       >
-        <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-md shadow-blue-200">
+        <div className="w-9 h-9 rounded-[10px] bg-linear-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-md shadow-blue-200">
           <Home className="w-5 h-5 text-white" />
         </div>
         RentLedger
@@ -63,5 +63,5 @@ export function AuthCard({
         </Link>
       </p>
     </div>
-  )
+  );
 }

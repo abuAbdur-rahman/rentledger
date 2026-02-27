@@ -5,7 +5,6 @@ import { BottomNav } from "@/components/dashboard/bottom-nav";
 import { UserProvider } from "@/components/auth/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import { getUser } from "@/services/user";
-import { ChatProvider } from "@/components/chat/chat-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -41,7 +40,6 @@ export default async function DashboardLayout({
           <div className="flex-1 pb-22 lg:pb-0">{children}</div>
         </main>
         <BottomNav role={user.role} />
-        <ChatProvider />
         <Toaster />
       </div>
     </UserProvider>

@@ -72,7 +72,7 @@ function FeatureCard({
 function Step({ num, title, description }: StepProps) {
   return (
     <div className="text-center">
-      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-500 text-white text-lg font-extrabold flex items-center justify-center mx-auto mb-4">
+      <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-blue-500 to-violet-500 text-white text-lg font-extrabold flex items-center justify-center mx-auto mb-4">
         {num}
       </div>
       <h4 className="text-base font-bold text-gray-900 mb-2">{title}</h4>
@@ -88,7 +88,7 @@ function Step({ num, title, description }: StepProps) {
 function DashboardPreview() {
   return (
     <div className="max-w-5xl mx-auto px-6 pb-20">
-      <div className="bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200 rounded-[20px] p-8 shadow-xl flex flex-wrap gap-6 items-start justify-center relative overflow-hidden">
+      <div className="bg-linear-to-br from-gray-50 to-blue-50 border border-gray-200 rounded-[20px] p-8 shadow-xl flex flex-wrap gap-6 items-start justify-center relative overflow-hidden">
         {/* Decorative blob */}
         <div className="absolute top-[-60px] right-[-60px] w-56 h-56 bg-violet-200/30 rounded-full blur-3xl pointer-events-none" />
 
@@ -293,7 +293,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard
             icon={<Home className="w-7 h-7 text-blue-500" />}
-            iconBg="bg-gradient-to-br from-blue-50 to-blue-100"
+            iconBg="bg-linear-to-br from-blue-50 to-blue-100"
             title="Track Properties"
             description="Manage multiple properties and units from a single clean dashboard. Add tenants, set rent amounts, and track occupancy in seconds."
             bullets={[
@@ -304,7 +304,7 @@ export default function LandingPage() {
           />
           <FeatureCard
             icon={<CreditCard className="w-7 h-7 text-violet-500" />}
-            iconBg="bg-gradient-to-br from-violet-50 to-violet-100"
+            iconBg="bg-linear-to-br from-violet-50 to-violet-100"
             title="Monitor Payments"
             description="Automatically track paid, pending, and overdue payments. See your total revenue and outstanding balances at a glance."
             bullets={[
@@ -315,7 +315,7 @@ export default function LandingPage() {
           />
           <FeatureCard
             icon={<Users className="w-7 h-7 text-green-600" />}
-            iconBg="bg-gradient-to-br from-green-50 to-green-100"
+            iconBg="bg-linear-to-br from-green-50 to-green-100"
             title="Reduce Disputes"
             description="Give tenants clear visibility into their rent status, due dates, and payment history. Transparency eliminates arguments."
             bullets={[
@@ -406,7 +406,7 @@ export default function LandingPage() {
             href="/"
             className="flex items-center gap-2 font-bold text-gray-900"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-linear-to-br from-blue-500 to-violet-500 flex items-center justify-center">
               <Home className="w-4 h-4 text-white" />
             </div>
             RentLedger

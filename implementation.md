@@ -566,7 +566,7 @@ export function PaymentDialog({ open, onOpenChange, rentInfo, onSuccess }: Props
       <DialogContent className="sm:max-w-[420px] p-0 rounded-2xl border border-gray-200 shadow-2xl overflow-hidden gap-0">
 
         {/* Gradient header */}
-        <div className={cn("px-6 pt-6 pb-5 bg-gradient-to-br", s.dialogBg)}>
+        <div className={cn("px-6 pt-6 pb-5 bg-linear-to-br", s.dialogBg)}>
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-[22px] font-black tracking-tight text-gray-900 leading-none">
               {isOverdue ? "⚠️ Rent Overdue" : "🏠 Rent Due"}
@@ -735,7 +735,7 @@ export function RentDueCard({ rentInfo }: { rentInfo: TenantRentInfo }) {
   return (
     <Card className={cn(
       "rounded-2xl border border-gray-200 border-t-4 shadow-md hover:shadow-lg",
-      "bg-gradient-to-br transition-shadow duration-200",
+      "bg-linear-to-br transition-shadow duration-200",
       s.cardTop, s.cardGrad,
     )}>
       <CardContent className="p-6">
@@ -973,7 +973,7 @@ function MobileHeader({ name }: { name: string }) {
     <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100">
       <div className="flex items-center justify-between h-14 px-4">
         <h1 className="text-base font-black text-gray-900 tracking-tight">Dashboard</h1>
-        <Avatar className="w-8 h-8 bg-gradient-to-br from-blue-500 to-violet-500 shadow-sm">
+        <Avatar className="w-8 h-8 bg-linear-to-br from-blue-500 to-violet-500 shadow-sm">
           <AvatarFallback className="text-white text-xs font-black bg-transparent">
             {getInitials(name)}
           </AvatarFallback>

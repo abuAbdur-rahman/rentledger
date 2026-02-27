@@ -1,9 +1,14 @@
-import { Calendar, MapPin } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Skeleton }          from "@/components/ui/skeleton"
-import { cn }                from "@/lib/utils"
-import { fmtCurrency, fmtDate, STATUS, StatusBadge } from "@/components/tenant/ui-kit"
-import type { TenantRentInfo } from "@/types/tenant"
+import { Calendar, MapPin } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import {
+  fmtCurrency,
+  fmtDate,
+  STATUS,
+  StatusBadge,
+} from "@/components/tenant/ui-kit";
+import type { TenantRentInfo } from "@/types/tenant";
 
 export function RentDueCardSkeleton() {
   return (
@@ -18,7 +23,7 @@ export function RentDueCardSkeleton() {
         </div>
         <div className="h-px bg-gray-100 mb-5" />
         <div className="space-y-3">
-          {[36, 44].map(w => (
+          {[36, 44].map((w) => (
             <div key={w} className="flex items-center gap-3">
               <Skeleton className="w-7 h-7 rounded-lg shrink-0" />
               <div className="space-y-1.5">
@@ -30,32 +35,40 @@ export function RentDueCardSkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export function RentDueCard({ rentInfo }: { rentInfo: TenantRentInfo }) {
-  const s = STATUS[rentInfo.currentPaymentStatus]
+  const s = STATUS[rentInfo.currentPaymentStatus];
 
   const countdownText =
     rentInfo.daysUntilDue === 0
       ? "Due today"
       : rentInfo.daysUntilDue < 0
         ? `${Math.abs(rentInfo.daysUntilDue)}d overdue`
-        : `${rentInfo.daysUntilDue}d until due`
+        : `${rentInfo.daysUntilDue}d until due`;
 
   return (
-    <Card className={cn(
-      "rounded-2xl border border-gray-200 border-t-4 shadow-md hover:shadow-lg",
-      "bg-gradient-to-br transition-shadow duration-200",
-      s.cardTop, s.cardGrad,
-    )}>
+    <Card
+      className={cn(
+        "rounded-2xl border border-gray-200 border-t-4 shadow-md hover:shadow-lg",
+        "bg-linear-to-br transition-shadow duration-200",
+        s.cardTop,
+        s.cardGrad,
+      )}
+    >
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-3 mb-5">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">
               Next Rent Due
             </p>
-            <p className={cn("text-[48px] font-black tracking-[-0.045em] leading-none", s.amount)}>
+            <p
+              className={cn(
+                "text-[48px] font-black tracking-[-0.045em] leading-none",
+                s.amount,
+              )}
+            >
               {fmtCurrency(rentInfo.rentAmount)}
             </p>
           </div>
@@ -70,9 +83,15 @@ export function RentDueCard({ rentInfo }: { rentInfo: TenantRentInfo }) {
           </span>
           <div>
             <p className="text-[13px] font-bold text-gray-800 leading-tight">
-              {fmtDate(rentInfo.nextDueDate, { month: "long", day: "numeric", year: "numeric" })}
+              {fmtDate(rentInfo.nextDueDate, {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
             </p>
-            <p className="text-[11px] text-gray-400 mt-0.5 tabular-nums">{countdownText}</p>
+            <p className="text-[11px] text-gray-400 mt-0.5 tabular-nums">
+              {countdownText}
+            </p>
           </div>
         </div>
 
@@ -85,11 +104,13 @@ export function RentDueCard({ rentInfo }: { rentInfo: TenantRentInfo }) {
               {rentInfo.unitLabel} · {rentInfo.propertyName}
             </p>
             {rentInfo.propertyAddress && (
-              <p className="text-[11px] text-gray-400 mt-0.5 truncate">{rentInfo.propertyAddress}</p>
+              <p className="text-[11px] text-gray-400 mt-0.5 truncate">
+                {rentInfo.propertyAddress}
+              </p>
             )}
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

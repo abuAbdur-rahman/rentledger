@@ -173,16 +173,12 @@ export function PaymentDialog({
         formData.append("file", file);
       }
 
-      await axios.post(
-        "/api/tenant/dashboard",
-        formData,
-        {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            "Content-Type": "multipart/form-data",
-          },
+      await axios.post("/api/tenant/dashboard", formData, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
 
       setDone(true);
       setTimeout(() => {
@@ -205,7 +201,7 @@ export function PaymentDialog({
   return (
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="sm:max-w-105 p-0 rounded-2xl border border-gray-200 shadow-2xl overflow-hidden gap-0">
-        <div className={cn("px-6 pt-6 pb-5 bg-gradient-to-br", s.dialogBg)}>
+        <div className={cn("px-6 pt-6 pb-5 bg-linear-to-br", s.dialogBg)}>
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-[22px] font-black tracking-tight text-gray-900 leading-none">
               {isOverdue ? "Rent Overdue" : "Rent Due"}

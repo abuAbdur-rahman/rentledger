@@ -177,7 +177,7 @@ export function AddTenantDialog({
       }}
     >
       <DialogContent className="w-[95vw] sm:max-w-[450px] max-h-[90vh] overflow-y-auto rounded-[16px] p-0 border border-gray-200 shadow-2xl">
-        <div className="bg-gradient-to-br from-green-50 to-white px-4 sm:px-6 pt-6 pb-5">
+        <div className="bg-linear-to-br from-green-50 to-white px-4 sm:px-6 pt-6 pb-5">
           <DialogHeader>
             <div className="w-11 h-11 bg-green-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm shadow-green-200">
               <UserPlus className="w-5 h-5 text-white" />
@@ -323,9 +323,7 @@ export function AddTenantDialog({
               <Button
                 type="button"
                 onClick={validatePhone}
-                disabled={
-                  !phone.trim() || validating || loading
-                }
+                disabled={!phone.trim() || validating || loading}
                 className="cursor-pointer h-11 rounded-xl border-gray-200 px-3 sm:px-4 text-sm font-medium whitespace-nowrap"
               >
                 {validating ? (
