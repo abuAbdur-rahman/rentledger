@@ -15,15 +15,6 @@ function deriveStatus(dbStatus: string, dueDate: string | null): PaymentStatus {
   return new Date(dueDate ?? "") < new Date() ? "overdue" : "pending";
 }
 
-function nextDueDateFunc(nextDueDateStr: string) {
-  const due = new Date(nextDueDateStr);
-  const now = new Date();
-  if (due <= now) {
-    due.setMonth(due.getMonth() + 1);
-  }
-  return due;
-}
-
 async function getAuthedUser() {
   const userData = await getUser();
   if (!userData || userData.role !== "tenant") return null;
@@ -202,7 +193,7 @@ export async function POST(req: NextRequest) {
       const fileExt = file.name.split(".").pop();
       const newFileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("payment-proofs")
         .upload(newFileName, buffer, {
           contentType: file.type,

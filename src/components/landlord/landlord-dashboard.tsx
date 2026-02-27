@@ -10,7 +10,6 @@ import type { DashboardSummary } from "@/services/dashboard"
 export function LandlordDashboard() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -24,7 +23,6 @@ export function LandlordDashboard() {
         setSummary(data.summary)
       } catch (err) {
         console.error("Failed to fetch dashboard summary:", err)
-        setError("Failed to load dashboard")
       } finally {
         setLoading(false)
       }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback }        from "react"
+import Image from "next/image"
 import axios, { type AxiosError }                  from "axios"
 import {
   AlertCircle, ChevronDown, ExternalLink,
@@ -343,9 +344,11 @@ export default function TenantHistoryPage() {
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Payment Proof</p>
                   {selectedPayment.proofUrl ? (
                     <div className="rounded-xl border border-gray-200 overflow-hidden">
-                      <img
+                      <Image
                         src={selectedPayment.proofUrl}
                         alt="Payment proof"
+                        width={400}
+                        height={300}
                         className="w-full h-auto max-h-[300px] object-contain bg-gray-50"
                       />
                     </div>

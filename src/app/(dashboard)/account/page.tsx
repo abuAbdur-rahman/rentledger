@@ -23,12 +23,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -48,7 +43,10 @@ function ProfileTab() {
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<{ full_name: string; phone_number: string }>(() => {
+  const [formData, setFormData] = useState<{
+    full_name: string;
+    phone_number: string;
+  }>(() => {
     if (profile) {
       return {
         full_name: profile.full_name || "",
@@ -58,6 +56,7 @@ function ProfileTab() {
     return { full_name: "", phone_number: "" };
   });
 
+  /*
   // Update formData when profile changes (only when not editing)
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
@@ -67,6 +66,20 @@ function ProfileTab() {
         phone_number: profile.phone_number || "",
       });
     }
+  }, [profile, isEditing]);
+  */
+
+  // Update formData when profile changes (only when not editing)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (profile && !isEditing) {
+        setFormData({
+          full_name: profile.full_name || "",
+          phone_number: profile.phone_number || "",
+        });
+      }
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [profile, isEditing]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -337,7 +350,11 @@ function PasswordTab() {
                 onClick={() => setShowCurrent(!showCurrent)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showCurrent ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -362,10 +379,16 @@ function PasswordTab() {
                 onClick={() => setShowNew(!showNew)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showNew ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
-            <p className="text-xs text-gray-400">Must be at least 6 characters</p>
+            <p className="text-xs text-gray-400">
+              Must be at least 6 characters
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -391,7 +414,11 @@ function PasswordTab() {
                 onClick={() => setShowConfirm(!showConfirm)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showConfirm ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -407,7 +434,9 @@ function PasswordTab() {
               ) : (
                 <Lock className="w-4 h-4" />
               )}
-              {changePassword.isPending ? "Changing Password..." : "Change Password"}
+              {changePassword.isPending
+                ? "Changing Password..."
+                : "Change Password"}
             </Button>
           </div>
         </form>
@@ -436,9 +465,9 @@ function SettingsTab() {
     setRefreshInterval(interval);
     localStorage.setItem(NOTIFICATION_REFRESH_KEY, String(interval));
     toast.success(
-      mins === 0 
-        ? "Auto-refresh disabled" 
-        : `Notifications will refresh every ${mins} minute${mins > 1 ? "s" : ""}`
+      mins === 0
+        ? "Auto-refresh disabled"
+        : `Notifications will refresh every ${mins} minute${mins > 1 ? "s" : ""}`,
     );
   };
 
@@ -495,7 +524,11 @@ function SettingsTab() {
                 Receive email updates about your account
               </p>
             </div>
-            <Button variant="outline" className="rounded-xl text-sm h-9" disabled>
+            <Button
+              variant="outline"
+              className="rounded-xl text-sm h-9"
+              disabled
+            >
               Coming Soon
             </Button>
           </div>
@@ -508,7 +541,11 @@ function SettingsTab() {
                 Receive text messages for important updates
               </p>
             </div>
-            <Button variant="outline" className="rounded-xl text-sm h-9" disabled>
+            <Button
+              variant="outline"
+              className="rounded-xl text-sm h-9"
+              disabled
+            >
               Coming Soon
             </Button>
           </div>
