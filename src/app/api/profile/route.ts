@@ -10,20 +10,32 @@ export async function GET() {
   }
 
   const supabase = await createServerClient();
-  const { data, error } = await supabase.auth.getUser();
+  
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone_number, role, created_at")
+    .eq("id", userData.id)
+    .single();
 
-  if (error) {
-    console.log(
-      "--------------------------------------------------/n/",
-      data,
-      "/n/--------------------------------------------------/n/",
-      "userData:",
-      userData,
-    );
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (profileError) {
+    console.log("Profile error:", profileError);
+    return NextResponse.json({ profile: null });
   }
 
-  return NextResponse.json({ profile: data });
+  if (!profile) {
+    return NextResponse.json({ profile: null });
+  }
+
+  const profileWithEmail = {
+    id: profile.id,
+    email: userData.email,
+    full_name: profile.full_name,
+    phone_number: profile.phone_number,
+    role: profile.role,
+    created_at: profile.created_at,
+  };
+
+  return NextResponse.json({ profile: profileWithEmail });
 }
 
 export async function PATCH(req: NextRequest) {

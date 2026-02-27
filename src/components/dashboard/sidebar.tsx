@@ -59,14 +59,9 @@ const landlordNav: NavItem[] = [
     icon: <CreditCard className="w-4.5 h-4.5" />,
   },
   {
-    href: "/profile",
-    label: "Profile",
+    href: "/account",
+    label: "Account",
     icon: <User className="w-4.5 h-4.5" />,
-  },
-  {
-    href: "/settings",
-    label: "Settings",
-    icon: <Settings className="w-4.5 h-4.5" />,
   },
 ];
 
@@ -82,14 +77,9 @@ const tenantNav: NavItem[] = [
     icon: <CreditCard className="w-4.5 h-4.5" />,
   },
   {
-    href: "/profile",
-    label: "Profile",
+    href: "/account",
+    label: "Account",
     icon: <User className="w-4.5 h-4.5" />,
-  },
-  {
-    href: "/settings",
-    label: "Settings",
-    icon: <Settings className="w-4.5 h-4.5" />,
   },
 ];
 
@@ -191,7 +181,7 @@ export function Sidebar({ user }: SidebarProps) {
             Support
           </p>
           <Link
-            href="/settings"
+            href="/account"
             className={cn(
               "group flex items-center gap-3 px-3 py-2.5 rounded-[10px]",
               "text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900",
@@ -268,7 +258,7 @@ export function Sidebar({ user }: SidebarProps) {
                 asChild
                 className="rounded-xl cursor-pointer focus:bg-gray-50"
               >
-                <Link href="/settings" className="flex items-center gap-2">
+                <Link href="/account" className="flex items-center gap-2">
                   <Settings className="w-4 h-4 text-gray-500" />
                   <span className="text-sm">Settings</span>
                 </Link>

@@ -23,10 +23,21 @@ export interface TenantPayment {
   rejectionReason: string | null
 }
 
+export interface TenantTenancyItem {
+  id: string
+  status: "pending" | "active" | "rejected" | "terminated"
+  startDate: string | null
+  unitLabel: string
+  propertyName: string
+  propertyAddress: string
+  rentAmount: number
+}
+
 export interface TenantDashboardResponse {
-  hasTenancy: boolean
+  hasActiveTenancy: boolean
   rentInfo: TenantRentInfo | null
   recentPayments: TenantPayment[]
+  tenancies: TenantTenancyItem[]
 }
 
 export interface TenantHistoryResponse {

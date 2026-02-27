@@ -24,6 +24,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -118,6 +125,7 @@ export default function PaymentsPage() {
     id: string;
     name: string;
   } | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<PaymentRow | null>(null);
   const [verifying, setVerifying] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
@@ -331,7 +339,8 @@ export default function PaymentsPage() {
                   return (
                     <div
                       key={payment.id}
-                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50/50 transition-colors"
+                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50/50 transition-colors cursor-pointer"
+                      onClick={() => setSelectedPayment(payment)}
                     >
                       {/* Avatar */}
                       <div
@@ -433,6 +442,86 @@ export default function PaymentsPage() {
         }}
         onSuccess={() => fetchPayments(pagination.page)}
       />
+
+      <Sheet open={!!selectedPayment} onOpenChange={(v) => !v && setSelectedPayment(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+          {selectedPayment && (
+            <>
+              <SheetHeader>
+                <SheetTitle>Payment Details</SheetTitle>
+                <SheetDescription>
+                  Full payment information and proof
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-full bg-gradient-to-br ${avatarColors[payments.indexOf(selectedPayment) % avatarColors.length]} flex items-center justify-center text-white text-sm font-bold shadow-sm`}
+                    >
+                      {selectedPayment.tenantInitials}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{selectedPayment.tenantName}</p>
+                      <p className="text-sm text-gray-500">{selectedPayment.propertyName}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Amount</p>
+                    <p className="text-lg font-bold text-gray-900">{formatCurrency(selectedPayment.amount)}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${statusCfg[selectedPayment.status]?.cls}`}
+                    >
+                      {statusCfg[selectedPayment.status]?.icon}
+                      {statusCfg[selectedPayment.status]?.label}
+                    </span>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Due Date</p>
+                    <p className="text-sm font-semibold text-gray-900">{formatDate(selectedPayment.dueDate)}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Paid On</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {selectedPayment.paidAt ? formatDate(selectedPayment.paidAt) : "—"}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedPayment.reference && (
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Reference</p>
+                    <p className="text-sm font-mono text-gray-900">{selectedPayment.reference}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Payment Proof</p>
+                  {selectedPayment.proofUrl ? (
+                    <div className="rounded-xl border border-gray-200 overflow-hidden">
+                      <img
+                        src={selectedPayment.proofUrl}
+                        alt="Payment proof"
+                        className="w-full h-auto max-h-[300px] object-contain bg-gray-50"
+                      />
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-gray-200 p-8 text-center">
+                      <p className="text-sm text-gray-400">No payment proof submitted</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

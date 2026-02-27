@@ -27,6 +27,7 @@ interface StatCardProps {
   icon: React.ReactNode;
   iconBg: string;
   accent?: "blue" | "amber" | "red" | "green";
+  formatAsCurrency?: boolean;
 }
 
 function StatCard({
@@ -36,6 +37,7 @@ function StatCard({
   icon,
   iconBg,
   accent = "blue",
+  formatAsCurrency = true,
 }: StatCardProps) {
   const accentBorder = {
     blue: "border-t-blue-500",
@@ -65,7 +67,7 @@ function StatCard({
         </div>
         <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
         <p className="text-2xl font-bold text-gray-900 tracking-tight">
-          {typeof value === "number" ? formatCurrency(value) : value}
+          {typeof value === "number" && formatAsCurrency ? formatCurrency(value) : value}
         </p>
         {sub && <div className="mt-2">{sub}</div>}
       </CardContent>
@@ -121,6 +123,7 @@ export function SummaryCards({ summary, loading }: SummaryCardsProps) {
         icon={<Clock className="w-5 h-5 text-amber-500" />}
         iconBg="bg-amber-50"
         accent="amber"
+        formatAsCurrency={false}
       />
       <StatCard
         title="Overdue"
@@ -128,6 +131,7 @@ export function SummaryCards({ summary, loading }: SummaryCardsProps) {
         icon={<AlertTriangle className="w-5 h-5 text-red-500" />}
         iconBg="bg-red-50"
         accent="red"
+        formatAsCurrency={false}
       />
       <StatCard
         title="Properties"
@@ -135,6 +139,7 @@ export function SummaryCards({ summary, loading }: SummaryCardsProps) {
         icon={<Building2 className="w-5 h-5 text-violet-500" />}
         iconBg="bg-violet-50"
         accent="blue"
+        formatAsCurrency={false}
       />
       <StatCard
         title="Active Tenants"
@@ -142,6 +147,7 @@ export function SummaryCards({ summary, loading }: SummaryCardsProps) {
         icon={<Users className="w-5 h-5 text-green-600" />}
         iconBg="bg-green-50"
         accent="green"
+        formatAsCurrency={false}
       />
     </div>
   );

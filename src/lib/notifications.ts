@@ -5,11 +5,13 @@ export async function createNotification({
   title,
   message,
   type = "system",
+  data,
 }: {
   userId: string
   title: string
   message?: string
-  type?: "payment" | "system" | "message"
+  type?: "payment" | "system" | "message" | "tenancy"
+  data?: Record<string, unknown>
 }) {
   const supabase = await createServerClient()
   
@@ -18,6 +20,7 @@ export async function createNotification({
     title,
     message,
     type,
+    data: data ?? {},
   })
 
   if (error) {

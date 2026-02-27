@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { AuthCard } from "@/components/auth/auth-card"
 import { LoginForm } from "@/components/auth/login-form"
+import { Loader2 } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Log In — RentLedger",
@@ -16,7 +18,13 @@ export default function LoginPage() {
       footerLinkText="Sign up"
       footerLinkHref="/auth/register"
     >
-      <LoginForm />
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+      }>
+        <LoginForm />
+      </Suspense>
     </AuthCard>
   )
 }

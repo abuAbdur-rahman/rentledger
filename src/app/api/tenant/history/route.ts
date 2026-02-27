@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
     const { data: rows, count, error: paymentsError } = await supabase
       .from("payments")
       .select(
-        "id, amount, status, payment_date, reference, proof_url, rejection_reason",
+        "id, amount, status, payment_date, reference, proof_url",
         { count: "exact" },
       )
       .eq("tenancy_id", tenancy.id)
@@ -67,11 +67,11 @@ export async function GET(req: NextRequest) {
       id: p.id,
       amount: p.amount ?? 0,
       status: deriveStatus(p.status, nextDueDate),
-      dueDate: nextDueDate,
+      dueDate: nextDueDate || new Date().toISOString(),
       paidAt: p.payment_date ?? null,
       reference: p.reference ?? null,
       proofUrl: p.proof_url ?? null,
-      rejectionReason: p.rejection_reason ?? null,
+      rejectionReason: null,
     }))
 
     return NextResponse.json({

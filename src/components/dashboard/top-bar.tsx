@@ -95,13 +95,13 @@ export function TopBar({ title, user }: TopBarProps) {
               <DropdownMenuSeparator className="bg-gray-100 my-1" />
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
-                  <Link href="/profile" className="flex items-center gap-2">
+                  <Link href="/account" className="flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">My Profile</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
-                  <Link href="/settings" className="flex items-center gap-2">
+                  <Link href="/account" className="flex items-center gap-2">
                     <Settings className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">Settings</span>
                   </Link>
