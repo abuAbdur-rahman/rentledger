@@ -24,6 +24,20 @@ export async function POST(req: NextRequest) {
 
     const newStatus = action === "accept" ? "active" : "rejected"
 
+    // When accepting a tenancy, terminate all other active tenancies for this user
+    if (action === "accept") {
+      const { error: terminateError } = await supabase
+        .from("tenancies")
+        .update({ status: "terminated" })
+        .eq("tenant_id", user.id)
+        .eq("status", "active")
+        .neq("id", tenancyId)
+
+      if (terminateError) {
+        console.error("Terminate error:", terminateError)
+      }
+    }
+
     const { error: updateError } = await supabase
       .from("tenancies")
       .update({ status: newStatus })

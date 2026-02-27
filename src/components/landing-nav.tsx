@@ -18,7 +18,7 @@ export function LandingNav() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Link href="/auth/login">
+          <Link href="/auth/login" className="hidden md:block">
             <Button
               variant="outline"
               className="h-10 px-4 text-sm font-semibold rounded-lg border-blue-500 text-blue-600 hover:bg-blue-50 transition-all"
