@@ -38,7 +38,7 @@ export const authService = {
         return { data: data as AuthUser, error: null };
       }
 
-      console.log(data, status);
+      console.error("Signup error:", data, status);
 
       return { data: null, error: "Failed to create account" };
     } catch (err) {
@@ -104,7 +104,7 @@ export const authService = {
 
       return { data: null, error: "Not authenticated" };
     } catch (err) {
-      console.log(err);
+      console.error("GetUser error:", err);
       return { data: null, error: "Not authenticated" };
     }
   },

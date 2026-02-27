@@ -32,8 +32,8 @@ export function BottomNav({ role }: { role?: "landlord" | "tenant" }) {
   const navItems = role === "tenant" ? tenantNav : landlordNav;
 
   return (
-    <nav className="fixed bottom-4 left-4 right-4 z-50 lg:hidden">
-      <div className="max-w-md mx-auto flex items-center justify-center gap-4 px-1 py-1.5 bg-white/90 backdrop-blur-md border border-gray-200/80 rounded-full shadow-xl shadow-gray-200/50">
+    <nav className="fixed bottom-3 left-3 right-3 z-50 lg:hidden">
+      <div className="max-w-md mx-auto flex items-center justify-between gap-1 px-1 py-1 bg-white/90 backdrop-blur-md border border-gray-200/80 rounded-2xl shadow-xl shadow-gray-200/50">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -45,17 +45,17 @@ export function BottomNav({ role }: { role?: "landlord" | "tenant" }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center px-4 py-2 rounded-full",
-                "transition-all duration-200 min-w-16",
+                "flex flex-col items-center justify-center px-2 py-1.5 rounded-xl flex-1",
+                "transition-all duration-200",
                 isActive
                   ? "text-blue-600 bg-blue-50"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-50",
               )}
             >
-              <Icon className={cn("w-5 h-5", isActive && "text-blue-500")} />
+              <Icon className={cn("w-4 h-4", isActive && "text-blue-500")} />
               <span
                 className={cn(
-                  "text-[0.625rem] font-medium mt-0.5",
+                  "text-[0.5rem] font-medium mt-0.5 truncate max-w-full",
                   isActive ? "text-blue-600" : "text-gray-500",
                 )}
               >

@@ -10,16 +10,17 @@ export async function GET(req: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    console.log(code, error);
-
-    if (!error) {
-      return NextResponse.redirect(`${origin}/auth/login?status=confirmed`, {
+    if (error) {
+      console.error("Auth callback error:", error);
+      return NextResponse.redirect(`${origin}/auth/login?error=confirmation_failed`, {
         headers,
       });
     }
-  }
 
-  console.log(code ? "code is detected" : "no code detected");
+    return NextResponse.redirect(`${origin}/auth/login?status=confirmed`, {
+      headers,
+    });
+  }
 
   return NextResponse.redirect(
     `${origin}/auth/login?error=confirmation_failed`,

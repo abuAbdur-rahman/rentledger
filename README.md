@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RentLedger
+
+A modern rent management platform built with Next.js and Supabase that helps landlords track properties, tenants, and payments while giving tenants clear visibility into their rent status.
+
+## About RentLedger
+
+RentLedger simplifies rent management by replacing manual tracking (notebooks, WhatsApp chats, Excel sheets) with structured dashboards and automated payment tracking.
+
+**Problem Solved:**
+- Landlords forget who has paid
+- Tenants forget due dates
+- No clear record of outstanding balances
+- Manual tracking causes conflicts and stress
+
+**Solution:**
+- Automated rent payment monitoring
+- Clear dashboards showing who paid and who hasn't
+- Overdue payment tracking
+- Role-based access for landlords and tenants
+
+## Tech Stack
+
+- **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS
+- **Backend:** Supabase (Auth + PostgreSQL)
+- **Database:** PostgreSQL with Row-Level Security (RLS)
+- **Deployment:** Vercel
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- pnpm (recommended)
+- Supabase project
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Clone the repository
+git clone <repository-url>
+
+# Install dependencies
+pnpm install
+
+# Set up environment variables
+# Create .env.local with your Supabase credentials
+cp .env.example .env.local
+
+# Run the development server
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+### Landlord Features
+- Create and manage properties
+- Add units inside properties
+- Assign tenants to units
+- Generate monthly rent records
+- Verify/reject payment submissions
+- View revenue, pending, and overdue payments
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Tenant Features
+- View assigned unit and rent amount
+- See next due date and overdue status
+- View payment history
+- Submit payment proof
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Smart Logic
+- Automatic overdue status calculation
+- Dashboard auto-calculations
+- One active tenancy per tenant
 
-## Deploy on Vercel
+## Database Schema
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **profiles** - User roles and profiles
+- **properties** - Landlord's properties
+- **units** - Units inside properties
+- **tenancies** - Tenant assignments to units
+- **payments** - Payment records
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── (dashboard)/        # Protected dashboard routes
+│   ├── api/               # API routes
+│   └── auth/              # Authentication pages
+├── components/             # React components
+├── hooks/                 # React Query hooks
+├── lib/                   # Utilities and helpers
+├── services/              # Business logic services
+└── types/                 # TypeScript types
+```
+
+## Security
+
+- Supabase Auth for user authentication
+- Row-Level Security (RLS) policies
+- Foreign key constraints
+- Enum validation
+
+## License
+
+MIT

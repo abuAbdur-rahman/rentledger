@@ -41,9 +41,35 @@ export async function PATCH(
       { status: 400 },
     );
 
+  // IDOR check: Verify the user owns the property for this payment's tenancy
+  const { data: payment, error: fetchError } = await supabase
+    .from("payments")
+    .select(`
+      id,
+      tenancy_id,
+      tenancies!inner(
+        id,
+        units!inner(
+          id,
+          properties!inner(landlord_id)
+        )
+      )
+    `)
+    .eq("id", paymentId)
+    .single();
+
+  if (fetchError || !payment?.tenancies?.units?.properties) {
+    return NextResponse.json({ error: "Payment not found" }, { status: 404 });
+  }
+
+  const landlordId = payment.tenancies.units.properties.landlord_id;
+  if (landlordId !== userId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const newStatus = action === "verify" ? "verified" : "rejected";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("payments") as any)
+  const { error } = await supabase
+    .from("payments")
     .update({ status: newStatus })
     .eq("id", paymentId);
 
@@ -51,17 +77,12 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 });
 
   if (action === "verify") {
-    const { data: payment, error: fetchError } = await supabase
-      .from("payments")
-      .select("tenancy_id")
-      .eq("id", paymentId)
-      .single();
-
-    if (!fetchError && payment?.tenancy_id) {
+    const tenancyId = payment.tenancy_id;
+    if (tenancyId) {
       const { data: tenancy, error: tenancyError } = await supabase
         .from("tenancies")
         .select("rent_cycle, next_due_date")
-        .eq("id", payment.tenancy_id)
+        .eq("id", tenancyId)
         .single();
 
       if (!tenancyError && tenancy?.next_due_date) {
@@ -73,7 +94,7 @@ export async function PATCH(
         await supabase
           .from("tenancies")
           .update({ next_due_date: newDueDate })
-          .eq("id", payment.tenancy_id);
+          .eq("id", tenancyId);
       }
     }
   }

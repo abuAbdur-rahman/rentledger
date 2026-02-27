@@ -46,17 +46,24 @@ function TenancyAcceptDialog({
   open,
   onOpenChange,
   tenancy,
+  hasActiveTenancy,
   onSuccess,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   tenancy: TenantTenancyItem | null;
+  hasActiveTenancy: boolean;
   onSuccess: () => void;
 }) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
 
   const handleAction = async (action: "accept" | "reject") => {
     if (!tenancy) return;
+    if (action === "accept" && hasActiveTenancy && !confirmed) {
+      setConfirmed(true);
+      return;
+    }
     setLoading(action);
     try {
       await axios.post("/api/tenancies/respond", {
@@ -65,6 +72,7 @@ function TenancyAcceptDialog({
       });
       toast.success(action === "accept" ? "Invitation accepted!" : "Invitation declined");
       onOpenChange(false);
+      setConfirmed(false);
       onSuccess();
     } catch (e) {
       const ae = e as AxiosError<{ error: string }>;
@@ -95,23 +103,62 @@ function TenancyAcceptDialog({
                 <p className="text-sm font-medium mt-2">₦{tenancy.rentAmount.toLocaleString()}</p>
               )}
             </div>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => handleAction("reject")}
-                disabled={!!loading}
-                className="flex-1"
-              >
-                {loading === "reject" ? "Declining..." : "Decline"}
-              </Button>
-              <Button
-                onClick={() => handleAction("accept")}
-                disabled={!!loading}
-                className="flex-1 bg-green-500 hover:bg-green-600"
-              >
-                {loading === "accept" ? "Accepting..." : "Accept"}
-              </Button>
-            </div>
+
+            {hasActiveTenancy && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <p className="text-sm font-medium text-amber-800">
+                  You already have an active tenancy
+                </p>
+                <p className="text-xs text-amber-600 mt-1">
+                  Accepting this invitation will replace your current tenancy. 
+                  You will need to make payments for the new unit.
+                </p>
+              </div>
+            )}
+
+            {confirmed || !hasActiveTenancy ? (
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (hasActiveTenancy) {
+                      setConfirmed(false);
+                    } else {
+                      handleAction("reject");
+                    }
+                  }}
+                  disabled={!!loading}
+                  className="flex-1"
+                >
+                  {loading === "reject" ? "Declining..." : "Decline"}
+                </Button>
+                <Button
+                  onClick={() => handleAction("accept")}
+                  disabled={!!loading}
+                  className="flex-1 bg-green-500 hover:bg-green-600"
+                >
+                  {loading === "accept" ? "Accepting..." : "Confirm Accept"}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => handleAction("reject")}
+                  disabled={!!loading}
+                  className="flex-1"
+                >
+                  {loading === "reject" ? "Declining..." : "Decline"}
+                </Button>
+                <Button
+                  onClick={() => handleAction("accept")}
+                  disabled={!!loading}
+                  className="flex-1 bg-green-500 hover:bg-green-600"
+                >
+                  {loading === "accept" ? "Accepting..." : "Accept"}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </DialogContent>
@@ -299,6 +346,7 @@ export function TenantDashboard() {
         open={acceptDlgOpen}
         onOpenChange={setAcceptDlgOpen}
         tenancy={selectedTenancy}
+        hasActiveTenancy={hasActiveTenancy}
         onSuccess={fetchData}
       />
     </div>

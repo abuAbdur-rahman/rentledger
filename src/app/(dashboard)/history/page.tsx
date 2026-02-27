@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback }        from "react"
+import Image from "next/image"
 import axios, { type AxiosError }                  from "axios"
 import {
   AlertCircle, ChevronDown, ExternalLink,
@@ -112,7 +113,10 @@ function HistoryRow({ p, onClick }: { p: TenantPayment; onClick?: () => void }) 
           {p.status === "rejected" && p.rejectionReason && (
             <button
               type="button"
-              onClick={() => setExpanded(v => !v)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(v => !v);
+              }}
               className="mt-1.5 text-left text-xs text-red-500 bg-red-50 border border-red-100
                 rounded-lg px-2 py-1 leading-relaxed w-full transition-colors hover:bg-red-100"
             >
@@ -343,9 +347,11 @@ export default function TenantHistoryPage() {
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Payment Proof</p>
                   {selectedPayment.proofUrl ? (
                     <div className="rounded-xl border border-gray-200 overflow-hidden">
-                      <img
+                      <Image
                         src={selectedPayment.proofUrl}
                         alt="Payment proof"
+                        width={400}
+                        height={300}
                         className="w-full h-auto max-h-[300px] object-contain bg-gray-50"
                       />
                     </div>

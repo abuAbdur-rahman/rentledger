@@ -35,6 +35,14 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const statusFilter = searchParams.get("status") ?? "all";
+
+  if (page < 1 || limit < 1 || limit > 100) {
+    return NextResponse.json(
+      { error: "Invalid pagination parameters. page >= 1, limit >= 1 and <= 100" },
+      { status: 400 },
+    );
+  }
+
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -128,7 +136,7 @@ export async function POST(req: NextRequest) {
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { phone, unitId, startDate } = await req.json();
+  const { phone, unitId, startDate, rentCycle } = await req.json();
   if (!phone?.trim())
     return NextResponse.json(
       { error: "Tenant phone is required." },
@@ -139,6 +147,9 @@ export async function POST(req: NextRequest) {
       { error: "Please select a unit." },
       { status: 400 },
     );
+
+  const validRentCycles = ["monthly", "annual"];
+  const rentCycleValue = validRentCycles.includes(rentCycle) ? rentCycle : "annual";
 
   // Verify unit belongs to landlord
   const { data: unit } = await supabase
@@ -190,6 +201,7 @@ export async function POST(req: NextRequest) {
       unit_id: unitId,
       status: "pending",
       start_date: startDate ?? new Date().toISOString(),
+      rent_cycle: rentCycleValue,
     })
     .select("id")
     .single();

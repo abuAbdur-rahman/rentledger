@@ -124,7 +124,7 @@ export function Sidebar({ user }: SidebarProps) {
     <aside className="hidden lg:flex flex-col w-60 xl:w-65 h-screen sticky top-0 bg-white border-r border-gray-100 shrink-0 z-30">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 h-16 border-b border-gray-100">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-sm shadow-blue-200">
+        <div className="w-8 h-8 rounded-xl bg-linear-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-sm shadow-blue-200">
           <Home className="w-4 h-4 text-white" />
         </div>
         <span className="font-black text-gray-900 text-[1.0625rem] tracking-[-0.02em]">
@@ -215,7 +215,7 @@ export function Sidebar({ user }: SidebarProps) {
             <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-gray-50 transition-colors group">
               <Avatar className="w-9 h-9 shrink-0">
                 <AvatarImage src={user.avatarUrl} alt={user.name} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-violet-500 text-white text-xs font-bold">
+                <AvatarFallback className="bg-linear-to-br from-blue-500 to-violet-500 text-white text-xs font-bold">
                   {initials}
                 </AvatarFallback>
               </Avatar>

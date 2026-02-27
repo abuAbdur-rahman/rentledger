@@ -82,7 +82,7 @@ export function AddUnitDialog({
       }}
     >
       <DialogContent className="sm:max-w-[380px] rounded-[16px] p-0 border border-gray-200 shadow-2xl overflow-hidden">
-        <div className="bg-gradient-to-br from-violet-50 to-white px-6 pt-6 pb-5">
+        <div className="bg-linear-to-br from-violet-50 to-white px-6 pt-6 pb-5">
           <DialogHeader>
             <div className="w-11 h-11 bg-violet-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm shadow-violet-200">
               <DoorOpen className="w-5 h-5 text-white" />

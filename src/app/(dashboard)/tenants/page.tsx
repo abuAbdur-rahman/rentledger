@@ -60,7 +60,7 @@ function TenantCard({ tenant, index }: { tenant: TenantItem; index: number }) {
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div
-            className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColors[index % avatarColors.length]} flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm`}
+            className={`w-10 h-10 rounded-full bg-linear-to-br ${avatarColors[index % avatarColors.length]} flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm`}
           >
             {getInitials(tenant.fullName)}
           </div>
