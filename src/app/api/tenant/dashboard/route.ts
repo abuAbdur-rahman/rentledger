@@ -54,8 +54,6 @@ export async function GET() {
       .eq("tenant_id", user.id)
       .order("created_at", { ascending: false });
 
-    console.log("All Tenancies", allTenancies);
-
     if (tenanciesError) {
       console.error("Tenancies error:", tenanciesError);
     }

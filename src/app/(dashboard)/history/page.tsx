@@ -113,7 +113,10 @@ function HistoryRow({ p, onClick }: { p: TenantPayment; onClick?: () => void }) 
           {p.status === "rejected" && p.rejectionReason && (
             <button
               type="button"
-              onClick={() => setExpanded(v => !v)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(v => !v);
+              }}
               className="mt-1.5 text-left text-xs text-red-500 bg-red-50 border border-red-100
                 rounded-lg px-2 py-1 leading-relaxed w-full transition-colors hover:bg-red-100"
             >

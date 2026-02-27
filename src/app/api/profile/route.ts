@@ -5,7 +5,6 @@ import { getUser } from "@/services/user";
 export async function GET() {
   const userData = await getUser();
   if (!userData) {
-    console.log("No user Data");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -18,7 +17,7 @@ export async function GET() {
     .single();
 
   if (profileError) {
-    console.log("Profile error:", profileError);
+    console.error("Profile error:", profileError);
     return NextResponse.json({ profile: null });
   }
 

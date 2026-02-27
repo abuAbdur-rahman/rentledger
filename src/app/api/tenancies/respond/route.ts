@@ -3,6 +3,16 @@ import { createServerClient } from "@/lib/supabase/server"
 import { getUser } from "@/services/user"
 import { createNotification } from "@/lib/notifications"
 
+function calculateNextDueDate(startDate: string, rentCycle: string | null): string {
+  const date = new Date(startDate);
+  if (rentCycle === "monthly") {
+    date.setMonth(date.getMonth() + 1);
+  } else {
+    date.setFullYear(date.getFullYear() + 1);
+  }
+  return date.toISOString();
+}
+
 export async function POST(req: NextRequest) {
   const user = await getUser()
   if (!user) {
@@ -24,7 +34,6 @@ export async function POST(req: NextRequest) {
 
     const newStatus = action === "accept" ? "active" : "rejected"
 
-    // When accepting a tenancy, terminate all other active tenancies for this user
     if (action === "accept") {
       const { error: terminateError } = await supabase
         .from("tenancies")
@@ -35,19 +44,50 @@ export async function POST(req: NextRequest) {
 
       if (terminateError) {
         console.error("Terminate error:", terminateError)
+        return NextResponse.json({ error: "Failed to terminate existing tenancy" }, { status: 500 })
       }
-    }
 
-    const { error: updateError } = await supabase
-      .from("tenancies")
-      .update({ status: newStatus })
-      .eq("id", tenancyId)
-      .eq("tenant_id", user.id)
-      .eq("status", "pending")
+      const { data: pendingTenancy, error: fetchError } = await supabase
+        .from("tenancies")
+        .select("start_date, rent_cycle")
+        .eq("id", tenancyId)
+        .single()
 
-    if (updateError) {
-      console.error("Update error:", updateError)
-      return NextResponse.json({ error: updateError.message }, { status: 500 })
+      if (fetchError || !pendingTenancy) {
+        return NextResponse.json({ error: "Tenancy not found" }, { status: 404 })
+      }
+
+      const nextDueDate = calculateNextDueDate(
+        pendingTenancy.start_date,
+        pendingTenancy.rent_cycle
+      )
+
+      const { error: updateError } = await supabase
+        .from("tenancies")
+        .update({ 
+          status: newStatus,
+          next_due_date: nextDueDate,
+        })
+        .eq("id", tenancyId)
+        .eq("tenant_id", user.id)
+        .eq("status", "pending")
+
+      if (updateError) {
+        console.error("Update error:", updateError)
+        return NextResponse.json({ error: updateError.message }, { status: 500 })
+      }
+    } else {
+      const { error: updateError } = await supabase
+        .from("tenancies")
+        .update({ status: newStatus })
+        .eq("id", tenancyId)
+        .eq("tenant_id", user.id)
+        .eq("status", "pending")
+
+      if (updateError) {
+        console.error("Update error:", updateError)
+        return NextResponse.json({ error: updateError.message }, { status: 500 })
+      }
     }
 
     const { data: tenancy } = await supabase
