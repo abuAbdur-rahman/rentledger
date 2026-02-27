@@ -176,8 +176,8 @@ export function AddTenantDialog({
         }
       }}
     >
-      <DialogContent className="w-[95vw] sm:max-w-[450px] max-h-[85vh] sm:max-h-[90vh] flex flex-col rounded-[16px] p-0 border border-gray-200 shadow-2xl">
-        <div className="flex-shrink-0 bg-linear-to-br from-green-50 to-white px-4 sm:px-6 pt-6 pb-5">
+      <DialogContent className="w-[95vw] sm:max-w-112.5 max-h-[85vh] sm:max-h-[90vh] flex flex-col rounded-3xl p-0 border border-gray-200 shadow-2xl">
+        <div className="shrink-0 bg-linear-to-br from-green-50 to-white px-4 sm:px-6 pt-6 pb-5">
           <DialogHeader>
             <div className="w-11 h-11 bg-green-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm shadow-green-200">
               <UserPlus className="w-5 h-5 text-white" />
@@ -212,7 +212,7 @@ export function AddTenantDialog({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {!preSelectedPropertyId && (
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-1.5 w-full">
                 <Label className="text-sm font-semibold text-gray-700">
                   Property <span className="text-red-500">*</span>
                 </Label>
@@ -225,7 +225,7 @@ export function AddTenantDialog({
                   }}
                 >
                   <SelectTrigger
-                    className={`h-11 rounded-xl text-sm ${errors.propertyId ? "border-red-400" : "border-gray-200"}`}
+                    className={`h-11 w-full rounded-xl text-sm ${errors.propertyId ? "border-red-400" : "border-gray-200"}`}
                   >
                     <SelectValue placeholder="Select a property" />
                   </SelectTrigger>
@@ -259,7 +259,7 @@ export function AddTenantDialog({
                 }}
               >
                 <SelectTrigger
-                  className={`h-11 rounded-xl text-sm ${errors.unitId ? "border-red-400" : "border-gray-200"}`}
+                  className={`h-11 w-full rounded-xl text-sm ${errors.unitId ? "border-red-400" : "border-gray-200"}`}
                   disabled={!propertyId || fetchingUnits}
                 >
                   <SelectValue
