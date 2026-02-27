@@ -63,7 +63,7 @@ export function exportToPDF(payments: PaymentRow[], filename: string = "payments
     p.tenantName,
     p.propertyName,
     p.unitLabel,
-    `$${p.amount.toFixed(2)}`,
+    `₦${p.amount.toFixed(2)}`,
     statusLabels[p.status] || p.status,
     p.dueDate,
     p.paidAt || "-",
