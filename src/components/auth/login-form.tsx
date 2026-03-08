@@ -236,7 +236,7 @@ export function LoginForm() {
       </form>
 
       <Dialog open={showConfirmedModal} onOpenChange={setShowConfirmedModal}>
-        <DialogContent className="sm:max-w-[420px] p-0 rounded-2xl border border-gray-200 shadow-2xl overflow-hidden">
+        <DialogContent className="sm:max-w-105 p-0 rounded-2xl border border-gray-200 shadow-2xl overflow-hidden">
           <DialogHeader className="pb-0 pt-6 px-6">
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-green-600" />

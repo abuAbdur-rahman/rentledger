@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Inter, Roboto } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
+//@ts-ignore
 import "./globals.css";
+
 
 const inter = Inter({
   variable: "--font-inter",
@@ -34,6 +36,7 @@ export default function RootLayout({
         className={`${inter.variable} ${roboto.variable} font-sans antialiased`}
       >
         <Providers>
+            
           {children}
           <Toaster position="top-center" richColors />
         </Providers>

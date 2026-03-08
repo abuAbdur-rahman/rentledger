@@ -40,11 +40,11 @@ function SkeletonRow() {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[45vh] text-center px-6">
-      <div className="w-20 h-20 bg-gray-100 rounded-[20px] flex items-center justify-center mb-5">
+      <div className="w-20 h-20 bg-gray-100 rounded-4xl flex items-center justify-center mb-5">
         <Receipt className="w-9 h-9 text-gray-400" />
       </div>
       <h3 className="text-lg font-black tracking-tight text-gray-900 mb-2">No payment history yet</h3>
-      <p className="text-sm text-gray-500 max-w-[260px] leading-relaxed">
+      <p className="text-sm text-gray-500 max-w-65 leading-relaxed">
         Your complete rent payment record will appear here after you make your first payment.
       </p>
     </div>
@@ -352,7 +352,7 @@ export default function TenantHistoryPage() {
                         alt="Payment proof"
                         width={400}
                         height={300}
-                        className="w-full h-auto max-h-[300px] object-contain bg-gray-50"
+                        className="w-full h-auto max-h-75 object-contain bg-gray-50"
                       />
                     </div>
                   ) : (

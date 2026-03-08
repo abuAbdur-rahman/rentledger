@@ -1,6 +1,6 @@
 # RentLedger
 
-A modern rent management platform built with Next.js and Supabase that helps landlords track properties, tenants, and payments while giving tenants clear visibility into their rent status.
+A modern rent management platform built with Next.js and MongoDB that helps landlords track properties, tenants, and payments while giving tenants clear visibility into their rent status.
 
 ## About RentLedger
 
@@ -21,8 +21,8 @@ RentLedger simplifies rent management by replacing manual tracking (notebooks, W
 ## Tech Stack
 
 - **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS
-- **Backend:** Supabase (Auth + PostgreSQL)
-- **Database:** PostgreSQL with Row-Level Security (RLS)
+- **Backend:** Node.js API routes + Mongoose
+- **Database:** MongoDB Atlas
 - **Deployment:** Vercel
 
 ## Getting Started
@@ -57,7 +57,13 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+MONGODB_URI=your_mongodb_connection_string
+DATA_PROVIDER=mongo
+AUTH_SECRET=your_long_random_secret
 ```
+
+- `DATA_PROVIDER` defaults to `mongo` when omitted.
+- Keep Supabase keys only if you still run legacy Supabase-backed endpoints.
 
 ## Features
 
@@ -105,8 +111,8 @@ src/
 
 ## Security
 
-- Supabase Auth for user authentication
-- Row-Level Security (RLS) policies
+- Signed HttpOnly session cookies
+- Password hashing for stored credentials
 - Foreign key constraints
 - Enum validation
 
