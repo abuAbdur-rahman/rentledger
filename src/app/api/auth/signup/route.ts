@@ -1,5 +1,11 @@
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/request";
+import { hashPassword } from "@/lib/auth/password";
+import { connectToMongoDB } from "@/lib/mongodb/connection";
+import { ProfileModel } from "@/lib/mongodb/models";
+import type { UserRole } from "@/types/database";
+
+const ALLOWED_ROLES = new Set<UserRole>(["landlord", "tenant"]);
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,41 +33,64 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { supabase } = createServerClient(req);
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone_number: phone,
-          role: role || "tenant",
-        },
-        emailRedirectTo: `${req.nextUrl.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      // console.log(`Failed to signUp User: ${error}`);
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    if (!data.user) {
+    if (password.length < 8) {
       return NextResponse.json(
-        { error: "Failed to create user" },
-        { status: 500 },
+        { error: "Password must be at least 8 characters" },
+        { status: 400 },
       );
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const normalizedPhone = String(phone).trim();
+    const roleValue = ALLOWED_ROLES.has(role as UserRole)
+      ? (role as UserRole)
+      : "tenant";
+
+    await connectToMongoDB();
+
+    const existingProfile = await ProfileModel.findOne({
+      $or: [
+        { email: normalizedEmail },
+        { phoneNumber: normalizedPhone },
+      ],
+    })
+      .select("_id email phoneNumber")
+      .lean();
+
+    if (existingProfile?.email === normalizedEmail) {
+      return NextResponse.json(
+        { error: "An account with this email already exists" },
+        { status: 409 },
+      );
+    }
+
+    if (existingProfile?.phoneNumber === normalizedPhone) {
+      return NextResponse.json(
+        { error: "This phone number is already registered" },
+        { status: 409 },
+      );
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    const createdProfile = await ProfileModel.create({
+      _id: randomUUID(),
+      fullName: fullName.trim(),
+      email: normalizedEmail,
+      passwordHash,
+      phoneNumber: normalizedPhone,
+      role: roleValue,
+    });
+
     return NextResponse.json({
       user: {
-        id: data.user.id,
-        email: data.user.email,
-        full_name: fullName,
-        role: role || "tenant",
+        id: String(createdProfile._id),
+        email: normalizedEmail,
+        full_name: createdProfile.fullName,
+        role: createdProfile.role,
+        phone: createdProfile.phoneNumber,
       },
-    });
+    }, { status: 201 });
   } catch (error) {
     console.warn("[auth/signup]", error);
     return NextResponse.json(

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getDataProvider } from "@/lib/data/provider";
 import { createServerClient } from "@/lib/supabase/server";
+import { createPropertiesRepository } from "@/lib/data/properties";
+import { getUser } from "@/services/user";
 
 export interface PropertyItem {
   id: string;
@@ -10,6 +13,18 @@ export interface PropertyItem {
   pendingPayments: number;
   overduePayments: number;
   createdAt: string;
+}
+
+function formatSchemaErrorMessage(message: string) {
+  if (message.includes("schema cache") || message.includes("Could not find the table")) {
+    return "Database tables are not initialized. Run the SQL in supabase/bootstrap.sql in your Supabase SQL editor.";
+  }
+  return message;
+}
+
+function parsePositiveInt(value: string | null, fallback: number): number {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 async function getUserId(
@@ -24,107 +39,71 @@ async function getUserId(
 
 // GET /api/properties — fetch all properties for the authenticated landlord
 export async function GET(req: NextRequest) {
-  const supabase = await createServerClient();
-  const userId = await getUserId(supabase);
+  const provider = getDataProvider();
+  const supabase = provider === "supabase" ? await createServerClient() : null;
+
+  const userId =
+    provider === "mongo"
+      ? (await getUser())?.id ?? null
+      : await getUserId(supabase!);
+
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const searchParams = req.nextUrl.searchParams;
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "10");
-  const from = (page - 1) * limit;
-  const to = from + limit - 1;
-
-  const {
-    data: properties,
-    count,
-    error,
-  } = await supabase
-    .from("properties")
-    .select(
-      `
-      id, name, address, created_at,
-      units (
-        id, name,
-        tenancies (
-          id, status, next_due_date,
-          payments ( id, status )
-        )
-      )
-    `,
-      { count: "exact" },
-    )
-    .eq("landlord_id", userId)
-    .order("created_at", { ascending: false })
-    .range(from, to);
-
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
-
-  const now = new Date();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const items: PropertyItem[] = (properties ?? []).map((p: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const allTenancies = (p.units ?? []).flatMap((u: any) => u.tenancies ?? []);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const activeTenancies = allTenancies.filter(
-      (t: any) => t.status === "active",
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pending = allTenancies.filter((t: any) => {
-      if (t.status !== "active") return false;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const hasPendingPayment = t.payments?.some(
-        (pay: any) => pay.status === "pending",
-      );
-      return hasPendingPayment && new Date(t.next_due_date) >= now;
-    }).length;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const overdue = allTenancies.filter((t: any) => {
-      if (t.status !== "active") return false;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const hasPayment = t.payments?.some(
-        (pay: any) => pay.status !== "paid" && pay.status !== "verified",
-      );
-      return hasPayment && new Date(t.next_due_date) < now;
-    }).length;
-
-    return {
-      id: p.id,
-      name: p.name,
-      address: p.address ?? "",
-      unitsCount: (p.units ?? []).length,
-      activeTenants: activeTenancies.length,
-      pendingPayments: pending,
-      overduePayments: overdue,
-      createdAt: p.created_at,
-    };
-  });
-
-  const totalPages = Math.ceil((count ?? 0) / limit);
-
-  return NextResponse.json(
-    {
-      properties: items,
-      pagination: {
-        page,
-        limit,
-        total: count ?? 0,
-        totalPages,
-      },
-    },
-    { status: 200 },
+  const repository = await createPropertiesRepository(
+    supabase ? { supabase } : {},
   );
+  const searchParams = req.nextUrl.searchParams;
+  const page = parsePositiveInt(searchParams.get("page"), 1);
+  const limit = parsePositiveInt(searchParams.get("limit"), 10);
+
+  try {
+    const result = await repository.listForLandlord({
+      userId,
+      page,
+      limit,
+    });
+
+    const typedProperties: PropertyItem[] = result.properties;
+
+    return NextResponse.json(
+      {
+        properties: typedProperties,
+        pagination: result.pagination,
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: formatSchemaErrorMessage(error.message) },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 },
+    );
+  }
 }
 
 // POST /api/properties — create a new property with N units
 export async function POST(req: NextRequest) {
-  const supabase = await createServerClient();
-  const userId = await getUserId(supabase);
+  const provider = getDataProvider();
+  const supabase = provider === "supabase" ? await createServerClient() : null;
+
+  const userId =
+    provider === "mongo"
+      ? (await getUser())?.id ?? null
+      : await getUserId(supabase!);
+
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const repository = await createPropertiesRepository(
+    supabase ? { supabase } : {},
+  );
 
   const body = await req.json();
   const { name, address, unitsCount, rentAmount } = body;
@@ -145,36 +124,27 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
 
-  // Create the property
-  const { data: property, error } = await supabase
-    .from("properties")
-    .insert({
-      landlord_id: userId,
+  try {
+    const property = await repository.createForLandlord({
+      userId,
       name: name.trim(),
       address: address?.trim() ?? null,
-    })
-    .select("id, name, address, created_at")
-    .single();
-
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
-
-  // Create N units
-  const units = [];
-  for (let i = 1; i <= unitsCount; i++) {
-    units.push({
-      property_id: property.id,
-      name: String(i),
-      rent_amount: rentAmount,
+      unitsCount,
+      rentAmount,
     });
-  }
 
-  const { error: unitsError } = await supabase.from("units").insert(units);
-  if (unitsError) {
-    // Rollback property if units fail
-    await supabase.from("properties").delete().eq("id", property.id);
-    return NextResponse.json({ error: unitsError.message }, { status: 500 });
-  }
+    return NextResponse.json({ property }, { status: 201 });
+  } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: formatSchemaErrorMessage(error.message) },
+        { status: 500 },
+      );
+    }
 
-  return NextResponse.json({ property }, { status: 201 });
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 },
+    );
+  }
 }

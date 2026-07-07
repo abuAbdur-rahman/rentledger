@@ -5,33 +5,25 @@ import { Loader2, ArrowLeft, Lock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AuthField } from "@/components/auth/auth-field";
-import { createClient } from "@/lib/supabase/client";
+import { useSearchParams } from "next/navigation";
+import axios from "axios";
 import Link from "next/link";
 
 function ResetPasswordForm() {
-  const supabase = createClient();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
-    async function checkSession() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
+    if (!token) {
         setError("Invalid or expired reset link. Please request a new one.");
-      }
-      setSessionChecked(true);
     }
-
-    checkSession();
-  }, [supabase]);
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,14 +47,10 @@ function ResetPasswordForm() {
     setError(null);
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
+      await axios.post("/api/auth/reset-password", {
+        token,
         password,
       });
-
-      if (updateError) {
-        setError(updateError.message || "Failed to reset password.");
-        return;
-      }
 
       setSuccess(true);
     } catch (err: unknown) {
@@ -72,14 +60,6 @@ function ResetPasswordForm() {
       setLoading(false);
     }
   };
-
-  if (!sessionChecked) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    );
-  }
 
   if (success) {
     return (
@@ -172,7 +152,7 @@ function ResetPasswordForm() {
 
             <Button
               type="submit"
-              disabled={loading || !!error}
+              disabled={loading || !!error || !token}
               className="w-full h-12 rounded-xl font-semibold bg-blue-500 hover:bg-blue-600 disabled:opacity-70"
             >
               {loading ? (

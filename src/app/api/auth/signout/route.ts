@@ -1,21 +1,25 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@/lib/supabase/request"
+import { NextResponse } from "next/server";
+import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
-    const { supabase, headers } = createServerClient(req)
+    const response = NextResponse.json({ success: true });
+    response.cookies.set({
+      name: SESSION_COOKIE_NAME,
+      value: "",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    });
 
-    await supabase.auth.signOut()
-
-    // Clear the user cookie
-    headers.set("Set-Cookie", "rl_user=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0")
-
-    return NextResponse.json({ success: true }, { headers })
+    return response;
   } catch (error) {
-    console.error("[auth/signout]", error)
+    console.error("[auth/signout]", error);
     return NextResponse.json(
       { error: "An unexpected error occurred" },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }

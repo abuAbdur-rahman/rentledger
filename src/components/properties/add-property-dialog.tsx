@@ -94,7 +94,7 @@ export function AddPropertyDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-[400px] rounded-[16px] p-0 border border-gray-200 shadow-2xl overflow-hidden">
+      <DialogContent className="sm:max-w-100 rounded-3xl p-0 border border-gray-200 shadow-2xl overflow-hidden">
         <div className="bg-linear-to-br from-blue-50 to-white px-6 pt-6 pb-5">
           <DialogHeader>
             <div className="w-11 h-11 bg-blue-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm shadow-blue-200">
