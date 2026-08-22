@@ -2,7 +2,7 @@
 
 import { useState, useCallback, SubmitEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Phone, Mail, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Loader2, Phone, ArrowRight, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -77,7 +77,6 @@ export function RegisterForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState("");
 
   const handleChange = useCallback(
     (field: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +122,6 @@ export function RegisterForm() {
       }
 
       if (result.data) {
-        setRegisteredEmail(values.email.trim());
         setSuccess(true);
 
         toast.success("Account created!", {
@@ -134,21 +132,6 @@ export function RegisterForm() {
       setServerError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const reSignUp = async () => {
-    if (registeredEmail) {
-      setLoading(true);
-      await authService.signUp(
-        registeredEmail,
-        values.password,
-        values.fullName.trim(),
-        values.phone.trim(),
-        role,
-      );
-      setLoading(false);
-      toast.success("Confirmation email resent!");
     }
   };
 
@@ -277,41 +260,14 @@ export function RegisterForm() {
               <CheckCircle2 className="w-8 h-8 text-green-600" />
             </div>
             <DialogTitle className="text-xl font-black text-center tracking-tight">
-              Check your email
+              Account created
             </DialogTitle>
             <DialogDescription className="text-sm text-gray-500 text-center leading-relaxed">
-              We&apos;ve sent a confirmation link to{" "}
-              <span className="font-semibold text-gray-700">
-                {registeredEmail}
-              </span>
-              .
-              <br />
-              Click the link to verify your account.
+              Your account is ready. You can now sign in to your dashboard.
             </DialogDescription>
           </DialogHeader>
 
           <div className="px-6 pb-6 pt-2">
-            <div className="bg-gray-50 rounded-xl p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-gray-700">
-                    Didn&apos;t receive the email?
-                  </p>
-                  <p className="text-gray-500 text-xs mt-0.5">
-                    Check your spam folder, or{" "}
-                    <button
-                      type="button"
-                      className="text-blue-500 hover:underline"
-                      onClick={reSignUp}
-                    >
-                      click here to resend
-                    </button>
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <Button
               onClick={handleGoToLogin}
               className="w-full h-12 rounded-xl font-semibold gap-2 bg-blue-500 hover:bg-blue-600"

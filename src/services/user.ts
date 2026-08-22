@@ -1,25 +1,15 @@
-import { cookies } from "next/headers"
-import type { UserRole } from "@/types/database"
+import { cookies } from "next/headers";
+import {
+  SESSION_COOKIE_NAME,
+  type SessionUser,
+  verifySessionToken,
+} from "@/lib/auth/session";
 
-export interface AuthUser {
-  id: string
-  email: string
-  full_name: string
-  role: UserRole
-}
+export type AuthUser = SessionUser;
 
 export const getUser = async (): Promise<AuthUser | null> => {
-  const cookieStore = await cookies()
-  const userCookie = cookieStore.get("rl_user")?.value
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
-  if (!userCookie) {
-    return null
-  }
-
-  try {
-    const user = JSON.parse(userCookie) as AuthUser
-    return user
-  } catch {
-    return null
-  }
-}
+  return verifySessionToken(sessionToken);
+};

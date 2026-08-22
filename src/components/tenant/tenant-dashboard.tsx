@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import axios, { AxiosError } from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +27,54 @@ import { PaymentDialog } from "@/components/tenant/payment-dialog";
 import type { TenantDashboardResponse, TenantTenancyItem } from "@/types/tenant";
 import { toast } from "sonner";
 
-function NoTenancyState() {
+interface PublicPropertyPreview {
+  id: string;
+  name: string;
+  address: string;
+  availableUnits: number;
+  totalUnits: number;
+  monthlyRentMin: number;
+  monthlyRentMax: number;
+}
+
+function AvailablePropertiesSection({ properties }: { properties: PublicPropertyPreview[] }) {
+  if (properties.length === 0) return null;
+
+  return (
+    <Card className="rounded-2xl">
+      <CardHeader>
+        <CardTitle className="text-lg">Available Properties</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {properties.map((property) => (
+          <div
+            key={property.id}
+            className="rounded-xl border border-gray-100 bg-white px-3 py-3"
+          >
+            <p className="text-sm font-semibold text-gray-900">{property.name}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{property.address || "No address provided"}</p>
+            <div className="flex items-center justify-between mt-2 text-xs text-gray-600">
+              <span>
+                {property.availableUnits} of {property.totalUnits} units available
+              </span>
+              <span className="font-semibold text-blue-600">
+                ₦{property.monthlyRentMin.toLocaleString()}
+                {property.monthlyRentMax > property.monthlyRentMin
+                  ? ` - ₦${property.monthlyRentMax.toLocaleString()}`
+                  : ""}
+              </span>
+            </div>
+          </div>
+        ))}
+        <Link href="/properties-overview" className="inline-block mt-2 text-sm font-semibold text-blue-600 hover:text-blue-700">
+          Browse all properties
+        </Link>
+      </CardContent>
+    </Card>
+  );
+}
+
+function NoTenancyState({ properties }: { properties: PublicPropertyPreview[] }) {
   return (
     <div className="p-6 lg:p-8 space-y-8">
       <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -38,6 +86,7 @@ function NoTenancyState() {
           </p>
         </CardContent>
       </Card>
+      <AvailablePropertiesSection properties={properties} />
     </div>
   );
 }
@@ -168,6 +217,7 @@ function TenancyAcceptDialog({
 
 export function TenantDashboard() {
   const [data, setData] = useState<TenantDashboardResponse | null>(null);
+  const [availableProperties, setAvailableProperties] = useState<PublicPropertyPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dlgOpen, setDlgOpen] = useState(false);
@@ -187,6 +237,15 @@ export function TenantDashboard() {
         { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );
       setData(res);
+
+      try {
+        const { data: propertyRes } = await axios.get<{ properties: PublicPropertyPreview[] }>(
+          "/api/properties/public?page=1&limit=4",
+        );
+        setAvailableProperties(propertyRes.properties ?? []);
+      } catch {
+        setAvailableProperties([]);
+      }
 
       if (
         res.hasActiveTenancy &&
@@ -243,7 +302,7 @@ export function TenantDashboard() {
   }
 
   if (!data || (data.tenancies.length === 0)) {
-    return <NoTenancyState />;
+    return <NoTenancyState properties={availableProperties} />;
   }
 
   const { rentInfo, recentPayments, tenancies, hasActiveTenancy } = data;
@@ -341,6 +400,8 @@ export function TenantDashboard() {
           </CardContent>
         </Card>
       )}
+
+      <AvailablePropertiesSection properties={availableProperties} />
 
       <TenancyAcceptDialog
         open={acceptDlgOpen}

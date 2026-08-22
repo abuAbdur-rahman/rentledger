@@ -1,82 +1,75 @@
-import { supabase } from "@/lib/supabase/client"
-import type { UserRole } from "@/types/database"
+import { authService } from "@/services/auth";
+import type { UserRole } from "@/types/database";
 
 export interface SignUpParams {
-  email: string
-  password: string
-  fullName: string
-  role: UserRole
+  email: string;
+  password: string;
+  fullName: string;
+  role: UserRole;
 }
 
 export interface SignInParams {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface AuthResult {
-  data: { user: unknown } | null
-  error: Error | null
+  data: { user: unknown } | null;
+  error: Error | null;
 }
 
 export async function signUp({ email, password, fullName, role }: SignUpParams): Promise<AuthResult> {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
-        role,
-      },
-    },
-  })
+  const result = await authService.signUp(email, password, fullName, undefined, role);
 
-  if (error) {
-    return { data: null, error }
+  if (result.error) {
+    return { data: null, error: new Error(result.error) };
   }
 
-  return { data: data as { user: unknown }, error: null }
+  if (!result.data) {
+    return { data: null, error: new Error("Failed to create account") };
+  }
+
+  return { data: { user: result.data }, error: null };
 }
 
 export async function signIn({ email, password }: SignInParams): Promise<AuthResult> {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  const result = await authService.signIn(email, password);
 
-  if (error) {
-    return { data: null, error }
+  if (result.error) {
+    return { data: null, error: new Error(result.error) };
   }
 
-  return { data: { user: data.user }, error: null }
+  return { data: { user: result.data?.user ?? null }, error: null };
 }
 
 export async function signOut(): Promise<{ error: Error | null }> {
-  const { error } = await supabase.auth.signOut()
-  return { error }
+  const result = await authService.signOut();
+  return { error: result.error ? new Error(result.error) : null };
 }
 
 export async function getCurrentUser() {
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const result = await authService.getCurrentUser();
 
-  if (error || !user) {
-    return { user: null, error }
+  if (result.error || !result.data) {
+    return {
+      user: null,
+      error: result.error ? new Error(result.error) : new Error("Not authenticated"),
+    };
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single()
-
-  if (profileError) {
-    return { user: null, error: profileError }
-  }
-
-  return { user: profile, error: null }
+  return { user: result.data, error: null };
 }
 
 export function onAuthStateChange(
   callback: (event: string, session: unknown) => void
 ) {
-  return supabase.auth.onAuthStateChange(callback)
+  // App now uses cookie-backed sessions, so this hook only emits a no-op unsubscribe.
+  callback("INITIAL_SESSION", null);
+  return {
+    data: {
+      subscription: {
+        unsubscribe: () => undefined,
+      },
+    },
+  };
 }

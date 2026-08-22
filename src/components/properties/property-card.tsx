@@ -32,7 +32,7 @@ export function PropertyCard({
   return (
     <Link href={`/properties/${id}`}>
       <Card className="group rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden">
-        <div className="h-1 w-full bg-gradient-to-r from-blue-500 to-violet-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+        <div className="h-1 w-full bg-linear-to-r from-blue-500 to-violet-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         <CardContent className="p-5">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div className="flex items-start gap-3 min-w-0">

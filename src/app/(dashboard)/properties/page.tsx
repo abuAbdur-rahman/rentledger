@@ -107,7 +107,7 @@ export default function PropertiesPage() {
   return (
     <>
       <TopBar title="Properties" user={headerUser} />
-      <div className="px-4 py-4 lg:px-8 lg:py-8 max-w-[1200px] mx-auto w-full">
+      <div className="px-4 py-4 lg:px-8 lg:py-8 max-w-300 mx-auto w-full">
         <PageHeader
           title="Properties"
           subtitle={`${pagination.total} propert${pagination.total !== 1 ? "ies" : "y"}`}
@@ -135,7 +135,7 @@ export default function PropertiesPage() {
             />
           </div>
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[140px] h-11 rounded-xl border-gray-200 text-sm bg-white gap-2">
+            <SelectTrigger className="w-35 h-11 rounded-xl border-gray-200 text-sm bg-white gap-2">
               <SlidersHorizontal className="w-4 h-4 text-gray-400" />
               <SelectValue />
             </SelectTrigger>
@@ -185,7 +185,7 @@ export default function PropertiesPage() {
         {/* Empty — no properties at all */}
         {!loading && !error && properties.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[45vh] text-center">
-            <div className="w-20 h-20 bg-blue-50 rounded-[20px] flex items-center justify-center mb-6 shadow-sm">
+            <div className="w-20 h-20 bg-blue-50 rounded-4xl flex items-center justify-center mb-6 shadow-sm">
               <Building2 className="w-10 h-10 text-blue-400" />
             </div>
             <h3 className="text-lg font-black tracking-[-0.02em] text-gray-900 mb-2">

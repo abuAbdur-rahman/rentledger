@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/request";
+import { verifyPassword } from "@/lib/auth/password";
+import {
+  createSessionToken,
+  SESSION_COOKIE_NAME,
+  SESSION_TTL_SECONDS,
+} from "@/lib/auth/session";
+import { connectToMongoDB } from "@/lib/mongodb/connection";
+import { ProfileModel } from "@/lib/mongodb/models";
 import type { UserRole } from "@/types/database";
 
 export async function POST(req: NextRequest) {
@@ -13,72 +20,57 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { supabase, headers } = createServerClient(req);
+    const normalizedEmail = String(email).trim().toLowerCase();
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error || !data.user || !data.session) {
-      console.error("Sign in error:", error);
+    await connectToMongoDB();
+
+    const profile = await ProfileModel.findOne({ email: normalizedEmail })
+      .select("_id email fullName role phoneNumber +passwordHash")
+      .lean();
+
+    if (!profile?.passwordHash) {
       return NextResponse.json(
-        { error: error?.message || "Invalid email or password" },
+        { error: "Invalid email or password" },
         { status: 401 },
       );
     }
-    // const { access_token, refresh_token } = data.session;
 
-    // await Promise.all([
-    //   headers.append(
-    //     "Set-Cookie",
-    //     `sb-access-token=${access_token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${data.session.expires_in}`,
-    //   ),
-    //   headers.append(
-    //     "Set-Cookie",
-    //     `sb-refresh-token=${refresh_token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`,
-    //   ),
-    // ]);
+    const isPasswordValid = await verifyPassword(password, profile.passwordHash);
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 },
+      );
+    }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id, full_name, role, phone_number")
-      .eq("id", data.user.id)
-      .single();
+    const role: UserRole = profile.role === "landlord" ? "landlord" : "tenant";
+    const user = {
+      id: String(profile._id),
+      email: profile.email || normalizedEmail,
+      full_name: profile.fullName || "",
+      role,
+      phone: profile.phoneNumber || null,
+    };
 
-    const role =
-      (profile?.role as UserRole) || data.user.user_metadata?.role || "tenant";
-    const fullName =
-      profile?.full_name || data.user.user_metadata?.full_name || "";
+    const sessionToken = createSessionToken({
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role,
+    });
 
-    // Store user in cookie for subsequent requests
-    const cookieValue = encodeURIComponent(
-      JSON.stringify({
-        id: data.user.id,
-        email: data.user.email,
-        full_name: fullName,
-        role,
-      }),
-    );
-    headers.append(
-      "Set-Cookie",
-      `rl_user=${cookieValue}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${data.session.expires_in}`,
-    );
+    const response = NextResponse.json({ user });
+    response.cookies.set({
+      name: SESSION_COOKIE_NAME,
+      value: sessionToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_TTL_SECONDS,
+    });
 
-    // Return session tokens so client can set Supabase cookies
-    return NextResponse.json(
-      {
-        user: {
-          id: data.user.id,
-          email: data.user.email,
-          full_name: fullName,
-          role,
-          phone: profile?.phone_number || data.user.user_metadata?.phone_number,
-        },
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-      },
-      { headers },
-    );
+    return response;
   } catch (error) {
     console.error("[auth/signin]", error);
     return NextResponse.json(

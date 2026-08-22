@@ -1,5 +1,8 @@
+import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/request";
+import { sha256Hex } from "@/lib/auth/password";
+import { connectToMongoDB } from "@/lib/mongodb/connection";
+import { ProfileModel } from "@/lib/mongodb/models";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,17 +15,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { supabase } = createServerClient(req);
+    const normalizedEmail = String(email).trim().toLowerCase();
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${req.nextUrl.origin}/auth/reset-password`,
-    });
+    await connectToMongoDB();
 
-    if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
+    const profile = await ProfileModel.findOne({ email: normalizedEmail })
+      .select("_id")
+      .lean();
+
+    // Do not disclose whether email exists.
+    if (profile) {
+      const rawToken = randomBytes(32).toString("hex");
+      const tokenHash = sha256Hex(rawToken);
+      const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
+      await ProfileModel.updateOne(
+        { _id: profile._id },
+        {
+          $set: {
+            passwordResetTokenHash: tokenHash,
+            passwordResetExpiresAt: expiresAt,
+          },
+        },
       );
+
+      if (process.env.NODE_ENV !== "production") {
+        return NextResponse.json({
+          success: true,
+          resetUrl: `${req.nextUrl.origin}/auth/reset-password?token=${rawToken}`,
+        });
+      }
     }
 
     return NextResponse.json({ success: true });

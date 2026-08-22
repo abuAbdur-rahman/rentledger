@@ -127,9 +127,9 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="w-8 h-8 rounded-xl bg-linear-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-sm shadow-blue-200">
           <Home className="w-4 h-4 text-white" />
         </div>
-        <span className="font-black text-gray-900 text-[1.0625rem] tracking-[-0.02em]">
+        <Link href="/" className="font-black text-gray-900 text-[1.0625rem] tracking-[-0.02em]">
           RentLedger
-        </span>
+        </Link>
       </div>
 
       {/* Nav Items */}
@@ -168,7 +168,7 @@ export function Sidebar({ user }: SidebarProps) {
                 {item.label}
               </div>
               {item.badge ? (
-                <Badge className="h-5 min-w-[20px] px-1.5 text-[0.625rem] font-bold bg-blue-500 text-white hover:bg-blue-500 rounded-full">
+                <Badge className="h-5 min-w-5 px-1.5 text-[0.625rem] font-bold bg-blue-500 text-white hover:bg-blue-500 rounded-full">
                   {item.badge}
                 </Badge>
               ) : null}
@@ -185,10 +185,10 @@ export function Sidebar({ user }: SidebarProps) {
             className={cn(
               "group flex items-center gap-3 px-3 py-2.5 rounded-[10px]",
               "text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-              "transition-all duration-150 min-h-[44px]",
+              "transition-all duration-150 min-h-11",
             )}
           >
-            <Settings className="w-[18px] h-[18px] text-gray-400 group-hover:text-gray-600 transition-colors" />
+            <Settings className="size-4.5 text-gray-400 group-hover:text-gray-600 transition-colors" />
             Settings
           </Link>
           <Link
@@ -196,10 +196,10 @@ export function Sidebar({ user }: SidebarProps) {
             className={cn(
               "group flex items-center gap-3 px-3 py-2.5 rounded-[10px]",
               "text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-              "transition-all duration-150 min-h-[44px]",
+              "transition-all duration-150 min-h-11",
             )}
           >
-            <HelpCircle className="w-[18px] h-[18px] text-gray-400 group-hover:text-gray-600 transition-colors" />
+            <HelpCircle className="size-4.5 text-gray-400 group-hover:text-gray-600 transition-colors" />
             Help & Support
           </Link>
         </div>

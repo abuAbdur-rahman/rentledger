@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -8,105 +8,38 @@ export async function proxy(request: NextRequest) {
     request,
   });
 
-  // Check for custom user cookie first (for faster auth check)
-  const userCookie = request.cookies.get("rl_user")?.value;
+  const sessionToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const sessionUser = verifySessionToken(sessionToken);
+
   let isAuthenticated = false;
-  let userId = "";
-  let userRole = "tenant";
-  let userEmail = "";
-  let userName = "";
+  let userRole: "landlord" | "tenant" = "tenant";
 
-  if (userCookie) {
-    try {
-      const cachedUser = JSON.parse(userCookie);
-      if (cachedUser?.id) {
-        // Validate Supabase session from cookies
-        const supabase = await createServerClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+  if (sessionUser) {
+    isAuthenticated = true;
+    userRole = sessionUser.role;
 
-        if (!session) {
-          throw new Error();
-        } else if (session.user.id !== cachedUser.id) {
-          throw new Error();
-        } else {
-          // Session valid
-          isAuthenticated = true;
-          userId = cachedUser.id;
-          userRole = cachedUser.role || "tenant";
-          userEmail = cachedUser.email || "";
-          userName = cachedUser.full_name || "";
-          // Inject headers from cookie for server components
-          response.headers.set("x-user-role", userRole);
-          response.headers.set("x-user-id", userId);
-          response.headers.set("x-user-email", userEmail);
-          response.headers.set("x-user-name", userName);
-        }
-      }
-    } catch {
-      // Invalid cookie, check with Supabase
-      response.cookies.delete("rl_user");
-    }
+    response.headers.set("x-user-role", sessionUser.role);
+    response.headers.set("x-user-id", sessionUser.id);
+    response.headers.set("x-user-email", sessionUser.email);
+    response.headers.set("x-user-name", sessionUser.full_name);
+  } else if (sessionToken) {
+    response.cookies.delete(SESSION_COOKIE_NAME);
   }
 
-  // If no custom cookie, check with Supabase
-  if (!isAuthenticated) {
-    const supabase = await createServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      isAuthenticated = true;
-      userId = user.id;
-      userEmail = user.email || "";
-
-      // Fetch profile for role
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role, full_name")
-        .eq("id", user.id)
-        .single();
-
-      userRole = profile?.role || "tenant";
-      userName = profile?.full_name || "";
-
-      // Store in cookie for subsequent requests
-      response.cookies.set(
-        "rl_user",
-        JSON.stringify({
-          id: userId,
-          email: userEmail,
-          full_name: userName,
-          role: userRole,
-        }),
-        {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 60 * 60 * 24 * 7,
-          path: "/",
-        },
-      );
-
-      // Inject headers
-      response.headers.set("x-user-role", userRole);
-      response.headers.set("x-user-id", userId);
-      response.headers.set("x-user-email", userEmail);
-      response.headers.set("x-user-name", userName);
-    }
-  }
-
+  // Define public routes (no authentication required)
   const isAuthPage = pathname.startsWith("/auth");
   const isPublicPage =
-    pathname === "/" ||
-    pathname.startsWith("/auth/") ||
-    pathname.startsWith("/api/");
-
-  const isDashboard = pathname.startsWith("/dashboard");
+    pathname === "/" || // Homepage
+    pathname.startsWith("/auth/") || // Auth pages
+    pathname.startsWith("/api/") || // API routes
+    pathname === "/properties-overview" || // Properties listing page
+    pathname.startsWith("/properties-overview/") || // Individual property pages
+    pathname === "/about" || 
+    pathname === "/contact" || 
+    pathname === "/pricing";
 
   // Public pages - allow access
-  if (isPublicPage && !isDashboard) {
+  if (isPublicPage) {
     return response;
   }
 
@@ -123,13 +56,31 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Role-based route protection
-  const landlordOnlyRoutes = ["/properties", "/tenants", "/payments"];
+  // Role-based route protection for authenticated users only
+  // These routes should only be accessible by specific roles
+  
+  // Landlord-only routes (management features)
+  const landlordOnlyRoutes = [
+    "/landlord/properties",
+    "/landlord/tenants",
+    "/landlord/payments",
+    "/landlord/units",
+    "/properties/manage",
+    "/tenants/manage",
+    "/payments/manage",
+  ];
 
-  const tenantOnlyRoutes = ["/history"];
+  // Tenant-only routes
+  const tenantOnlyRoutes = [
+    "/tenant/history",
+    "/tenant/payments",
+    "/tenant/profile",
+  ];
 
-  // Allow both roles to access profile and settings
-  const sharedRoutes = ["/profile", "/settings"];
+  // Shared routes (both roles can access)
+  const sharedRoutes = ["/profile", "/settings", "/notifications"];
+
+  // Check shared routes first
   const isSharedRoute = sharedRoutes.some((route) =>
     pathname.startsWith(route),
   );
@@ -137,6 +88,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
+  // Check tenant-only routes
   const isTenantOnlyRoute = tenantOnlyRoutes.some((route) =>
     pathname.startsWith(route),
   );
@@ -144,6 +96,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // Check landlord-only routes
   const isLandlordOnlyRoute = landlordOnlyRoutes.some((route) =>
     pathname.startsWith(route),
   );
@@ -159,5 +112,3 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-
-//abdulazeez.creative.dev@gmail.com

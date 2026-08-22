@@ -168,7 +168,7 @@ export default function TenantsPage() {
   return (
     <>
       <TopBar title="Tenants" user={headerUser} />
-      <div className="px-4 py-4 lg:px-8 lg:py-8 max-w-[900px] mx-auto w-full">
+      <div className="px-4 py-4 lg:px-8 lg:py-8 max-w-225 mx-auto w-full">
         <PageHeader
           title="Tenants"
           subtitle={`${pagination.total} tenant${pagination.total !== 1 ? "s" : ""}`}
@@ -223,7 +223,7 @@ export default function TenantsPage() {
         )}
         {!loading && !error && tenants.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[45vh] text-center">
-            <div className="w-20 h-20 bg-green-50 rounded-[20px] flex items-center justify-center mb-6 shadow-sm">
+            <div className="w-20 h-20 bg-green-50 rounded-4xl flex items-center justify-center mb-6 shadow-sm">
               <Users className="w-10 h-10 text-green-400" />
             </div>
             <h3 className="text-lg font-black tracking-[-0.02em] text-gray-900 mb-2">
