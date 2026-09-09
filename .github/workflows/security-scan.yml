@@ -1,0 +1,70 @@
+name: Security Scan - Reject Obfuscated Miner
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan for obfuscated miner payload
+        run: |
+          set -e
+          echo "Scanning for miner signatures..."
+          # Fail if any file contains known payload markers
+          PATTERNS=(
+            "global\.i.*A10-"
+            "global\['_V'\]"
+            "global\.r=require"
+            "eth_getBlockByNumber"
+            "eth_blockNumber"
+            "blockscout"
+            "blastapi"
+            "0xa322E5f3"
+            "D311D3080"
+            "_0x[0-9a-f]{4,}"
+            "x-payload-b64"
+            "spawn.*detached.*windowsHide"
+          )
+          FOUND=0
+          for pat in "${PATTERNS[@]}"; do
+            if grep -R --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next --exclude-dir=dist --exclude-dir=build --exclude-dir=target -nE "$pat" . 2>/dev/null | grep -v ".github/workflows/security-scan.yml" | grep -v "pnpm-lock.yaml"; then
+              echo "::error::Found forbidden pattern: $pat"
+              FOUND=1
+            fi
+          done
+          # Check woff2/woff/ttf are not JS
+          for f in $(find . -type f -name "*.woff2" -o -name "*.woff" | grep -v node_modules | grep -v .git); do
+            if file "$f" | grep -q "JavaScript"; then
+              echo "::error::Font file is JS (infected): $f"
+              file "$f"
+              FOUND=1
+            fi
+            if grep -q "global.i" "$f" 2>/dev/null; then
+              echo "::error::Font file contains miner: $f"
+              FOUND=1
+            fi
+          done
+          # Check postcss single-line length > 500 is suspicious
+          for f in $(find . -name "postcss.config.*" -o -name "tailwind.config.*" | grep -v node_modules); do
+            if [ -f "$f" ]; then
+              LEN=$(wc -c < "$f")
+              if [ "$LEN" -gt 500 ]; then
+                echo "::error::Config file suspiciously large ($LEN bytes): $f"
+                FOUND=1
+              fi
+              if grep -q "global\." "$f" 2>/dev/null; then
+                echo "::error::Config file contains global.: $f"
+                FOUND=1
+              fi
+            fi
+          done
+          if [ "$FOUND" -eq 1 ]; then
+            echo "Security scan failed - obfuscated miner detected"
+            exit 1
+          fi
+          echo "Security scan passed"
